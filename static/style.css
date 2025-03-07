@@ -1,0 +1,92 @@
+body {
+  background-color: #F0EAD6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+}
+
+.form-container {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+}
+#password-warning {
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+button {
+  background-color: #FF6F61;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  width: 100%;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #E64C3C;
+}
+
+/* Style untuk pesan peringatan */
+.warning {
+  color: red;
+  font-size: 12px;
+  margin-top: -1rem;
+  margin-bottom: 1rem;
+  display: none; /* Tidak terlihat awalnya */
+}
+
+@media (max-width: 600px) {
+  body {
+      padding: 1rem;
+  }
+
+  .form-container {
+      width: 100%;
+      padding: 1.5rem;
+  }
+
+  input[type="password"], button {
+      font-size: 14px;
+  }
+  input[type="text"], button {
+    font-size: 14px;
+}
+}
