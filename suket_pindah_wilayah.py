@@ -56,7 +56,7 @@ else:
   romawi = "Terjadi kesalahan"
   kabisat = "Terjadi kesalahan"
 
-def create_pdf(file_path,no_surat, tanggal, romawi, tahun, alamat, rw, rt, data, keterangan):
+def create_pdf(file_path,no_surat, tanggal, romawi, tahun, alamat, rw, rt, data, nomorSPKTP, tglSPKTP, keterangan):
     doc = BaseDocTemplate(file_path, pagesize=head.F4)
     frame = Frame(doc.leftMargin, doc.bottomMargin, width=doc.width, height=doc.height - 1.8 * cm, leftPadding=4, rightPadding=3, id='normal')
     template = PageTemplate(id='header_footer', frames=frame, onPage=head.header_footer)
@@ -71,7 +71,7 @@ def create_pdf(file_path,no_surat, tanggal, romawi, tahun, alamat, rw, rt, data,
 
     table.table_normal_dalam(elements, data, align.left(12, 2), 0.2*cm)
 
-    text3 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Benar yang bersangkutan memiliki sebidang tanah di {alamat} RT.{rt} RW.{rw} Kelurahan Limbungan Kecamatan Rumbai Timur Kota Pekanbaru, dimana dahulunya termasuk wilayah administrasi Kelurahan Limbungan Kecamatan Rumbai Pesisir berdasarkan Surat Pernyataan Kepemilikan/ Penguasaan Tanah Register Lurah Limbungan Nomor : 26/595.3/LB-SPKPT/XII/2020 tanggal 28 Desember 2000 dan sesuai <b>Nomor 03 dan Nomor 04 tanggal 17 Juni 2003</b> tentang pemekaran wilayah dan <b>Perda Nomor 10 tahun 2019</b> tentang Pembentukan Kecamatan. "
+    text3 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Benar yang bersangkutan memiliki sebidang tanah di {alamat} RT.{rt} RW.{rw} Kelurahan Limbungan Kecamatan Rumbai Timur Kota Pekanbaru, dimana dahulunya termasuk wilayah administrasi Kelurahan Limbungan Kecamatan Rumbai Pesisir berdasarkan Surat Pernyataan Kepemilikan/ Penguasaan Tanah Register Lurah Limbungan Nomor : {nomorSPKTP} tanggal {tglSPKTP} dan sesuai <b>Nomor 03 dan Nomor 04 tanggal 17 Juni 2003</b> tentang pemekaran wilayah dan <b>Perda Nomor 10 tahun 2019</b> tentang Pembentukan Kecamatan. "
     elements.append(Paragraph(text3, align.justify_with_leading(12,0,1.5)))
 
     # table.table_dalam(elements, domisili, align.left(12, 1))    
@@ -83,16 +83,16 @@ def create_pdf(file_path,no_surat, tanggal, romawi, tahun, alamat, rw, rt, data,
 
     doc.build(elements)
 
-data_pengajuan = {
-    "Nama": "<b>SAREAH</b>",
-    "Jenis Kelamin": "Perempuan",
-    "NIK": "1471124411540001",
-    "Tempat, Tanggal Lahir": "Tenayan Jaya, 04-11-1954",
-    "Agama": "Islam",
-    "Pekerjaan": "Buruh Harian Lepas",
-    "Alamat": "Jl. Teluk Leok RT.01 RW.01 Kel. Limbungan",
-}
+# data_pengajuan = {
+#     "Nama": "<b>SAREAH</b>",
+#     "Jenis Kelamin": "Perempuan",
+#     "NIK": "1471124411540001",
+#     "Tempat, Tanggal Lahir": "Tenayan Jaya, 04-11-1954",
+#     "Agama": "Islam",
+#     "Pekerjaan": "Buruh Harian Lepas",
+#     "Alamat": "Jl. Teluk Leok RT.01 RW.01 Kel. Limbungan",
+# }
 
-nomor_surat = 650
+# nomor_surat = 650
 
-create_pdf("static/file/suket_pindah_wilayah.pdf",nomor_surat, "12 Oktober 2024", romawi, tahun, data_pengajuan)
+# create_pdf("static/file/suket_pindah_wilayah.pdf",nomor_surat, "12 Oktober 2024", romawi, tahun, alamat, rw, rt, data_pengajuan, keterangan)

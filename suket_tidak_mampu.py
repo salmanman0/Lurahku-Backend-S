@@ -9,7 +9,7 @@ table = Table()
 head = HeaderFooter()
 ttd = TandaTangan()
 
-def create_pdf(file_path,no_surat, tanggal, romawi, tahun, terlapor, alamat , rt, rw, keterangan):
+def create_pdf(file_path,no_surat, tanggal, romawi, tahun, pelapor, alamat , rt, rw, keterangan):
     doc = BaseDocTemplate(file_path, pagesize=head.F4)
     frame = Frame(doc.leftMargin, doc.bottomMargin, width=doc.width, height=doc.height - 1.8 * cm, leftPadding=4, rightPadding=3, id='normal')
     template = PageTemplate(id='header_footer', frames=frame, onPage=head.header_footer)
@@ -22,7 +22,7 @@ def create_pdf(file_path,no_surat, tanggal, romawi, tahun, terlapor, alamat , rt
     text1 = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lurah Limbungan Kecamatan Rumbai Timur Kota Pekanbaru, dengan ini menerangkan bahwa : "
     elements.append(Paragraph(text1, align.justify_with_leading(12,0,1.5)))
 
-    table.table_normal_dalam(elements, terlapor, align.left(12, 2), 0.2*cm)
+    table.table_normal_dalam(elements, pelapor, align.left(12, 2), 0.2*cm)
 
     text3 = f"<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Berdasarkan Surat Keterangan Nomor {no_surat}/RT.{rt}/RW.{rw}/LB/{tahun} yang dikeluarkan RT.{rt} RW.{rw} benar nama tersebut berdomisili di {alamat} RT.{rt} RW.{rw} Kelurahan Limbungan dan termasuk Keluarga <b>Kurang Mampu</b>. <br/>"
     elements.append(Paragraph(text3, align.justify_with_leading(12,2,1.5)))

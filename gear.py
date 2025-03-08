@@ -4,6 +4,9 @@ from reportlab.platypus import Paragraph, Table as PlatypusTable, TableStyle
 from reportlab.lib.units import cm
 from reportlab.lib import colors
 from datetime import datetime
+from reportlab.lib.pagesizes import letter
+
+from reportlab.platypus import Image, Spacer
 
 def get_waktu():
     waktu = datetime.now()
@@ -127,6 +130,7 @@ class Table:
         ]))
         
         elements.append(table)
+
     @staticmethod
     def table_normal_dalam_numbering(elements, data, align_style, space):
         table_data = []
@@ -145,6 +149,7 @@ class Table:
         ]))
         
         elements.append(table)
+
     @staticmethod
     def table_normal(elements, data, align_style, space):
         table_data = []
@@ -169,7 +174,7 @@ class Table:
             row = [
                 str(idx),  # Kolom No
                 Paragraph(value['Nama'], align_style),  # Kolom Nama
-                Paragraph(f"{value['Tempat']} {value['Tanggal Lahir']}", align_style),  # Kolom Tempat/Tgl Lahir
+                Paragraph(f"{value['Tempat/Tgl Lahir']}", align_style),  # Kolom Tempat/Tgl Lahir
                 Paragraph(value['Pekerjaan'], align_style),  # Kolom Pekerjaan
                 Paragraph(value['Status'], align_style)  # Kolom Status
             ]
@@ -189,18 +194,20 @@ class Table:
 
 class HeaderFooter:
     def __init__(self):
-        self.F4 = (21 * cm, 33 * cm)
+        # self.F4 = (21 * cm, 33 * cm)
+        self.letter = (21.59 * cm, 27.94 * cm)
+        # self.letter_size = letter
     
     def header_footer(self, canvas, doc):
         canvas.saveState()
 
         margin_left = 2 * cm
-        margin_top = self.F4[1] - 2 * cm
+        margin_top = self.letter[1] - 2 * cm
 
         logo_path = "static/image/LimbunganLogo.jpg"
         canvas.drawImage(logo_path, margin_left, margin_top - 2.1 * cm, width=3.5 * cm, height=3.5 * cm)
 
-        page_width = self.F4[0]
+        page_width = self.letter[0]
 
         header_text_1 = "PEMERINTAH KOTA PEKANBARU"
         text_width_1 = canvas.stringWidth(header_text_1, 'Times-Bold', 12)
@@ -229,12 +236,33 @@ class HeaderFooter:
 
         canvas.setStrokeColor(colors.black)
         canvas.setLineWidth(1)
-        canvas.line(margin_left, margin_top - 2.2 * cm, self.F4[0] - margin_left, margin_top - 2.2 * cm)
-        canvas.line(margin_left, margin_top - 2.25 * cm, self.F4[0] - margin_left, margin_top - 2.25 * cm)
+        canvas.line(margin_left, margin_top - 2.2 * cm, self.letter[0] - margin_left, margin_top - 2.2 * cm)
+        canvas.line(margin_left, margin_top - 2.25 * cm, self.letter[0] - margin_left, margin_top - 2.25 * cm)
 
         canvas.restoreState()
 
-class TandaTangan :
+
+import socket
+
+def get_local_ip():
+    hostname = socket.gethostname()  # Mengambil nama host mesin
+    ip_address = socket.gethostbyname(hostname)  # Mendapatkan IP address lokal
+    return ip_address
+
+class TandaTangan:
     def tanda_tangan(self, elements, tanggal, align_style) :
-        ttd = f"Pekanbaru, {tanggal}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/><b>LURAH LIMBUNGAN</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/><br/><br/><br/><br/><br/><b><u>WELFINASARI HARAHAP, S.Sos, M.M.</u></b><br/>NIP. 19840611 200801 2 007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-        elements.append(Paragraph(ttd, align_style))
+        # Teks sebelum tanda tangan
+        ttd_awal = f"Pekanbaru, {tanggal}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/><b>LURAH LIMBUNGAN</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+        elements.append(Paragraph(ttd_awal, align_style))
+        
+        # ip_server = get_local_ip()
+        
+        # Menambahkan gambar tanda tangan
+        path_ttd_image = "/static/image/ttd.png"  # Ganti dengan path ke file gambar tanda tangan Anda
+        img_url = f"https://kelurahan-limbungan.pocari.id{path_ttd_image}"
+        img = Image(img_url, width=200, height=100, hAlign='RIGHT')  # hAlign='RIGHT' untuk menggeser ke kanan
+        elements.append(img)
+        
+        # Menambahkan teks setelah tanda tangan
+        ttd_akhir = f"<b><u>WELFINASARI HARAHAP, S.Sos, M.M.</u></b><br/>NIP. 19840611 200801 2 007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+        elements.append(Paragraph(ttd_akhir, align_style))

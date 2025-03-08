@@ -15,6 +15,11 @@ from flask_cors import CORS
 
 import suket_kematian as sk
 import suket_penghasilan as sp
+import suket_tidak_mampu as stm
+import suket_domisili as sd
+import suket_pindah_wilayah as spw
+import suket_tanggungan as stk
+import suket_orang_yang_sama as soys
 import gear as gear
 
 app = Flask(__name__)
@@ -23,7 +28,6 @@ CORS(app)
 UPLOAD_FOLDER = 'static/image/'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
@@ -103,7 +107,6 @@ def reset_password(token):
             return jsonify({'message': 'Password berhasil direset!'}), 200
         except Exception as e:
             return jsonify({'message': 'Token sudah kedaluwarsa, silahkan minta ulang password', 'error': str(e)}), 400
-
     return render_template('reset_password.html', token=token)
 
 @app.route("/login", methods=['POST'])
@@ -118,7 +121,7 @@ def login():
     else :
         jabatan = user['jabatan']
         access_token = create_access_token(identity={'uId' : uId, 'jabatan' : jabatan})
-        return jsonify(access_token=access_token, status="sukses"), 200
+        return jsonify(access_token=access_token, status="sukses", jabatan=jabatan), 200
 
 @app.route('/logout', methods=['POST'])
 @jwt_required()
@@ -1128,6 +1131,91 @@ def post_suket_tanggungan() :
     else :
         return jsonify(status='gagal', message="Hanya dapat menggunakan NIK yang terdaftar di KK")
 
+@app.route("/post_suket_orang_yang_sama", methods=['POST'])
+@jwt_required()
+def post_suket_orang_yang_sama():
+    current_user = get_jwt_identity()
+    uId = current_user['uId']
+    uId = int(uId)
+    nikP = request.form.get('nikP')
+    pelapor = db.warga.find_one({"nik": nikP}, {"_id": 0})
+    if uId == pelapor['uId'] :
+        dokumenBenar = request.form.get('dokumenBenar')
+        nomorDokumenBenar = request.form.get('nomorDokumenBenar')
+        dokumenSalah = request.form.get('dokumenSalah')
+        nomorDokumenSalah = request.form.get('nomorDokumenSalah')
+        dataBenar = request.form.get('dataBenar')
+        dataSalah = request.form.get('dataSalah')
+        keteranganP = request.form.get('keteranganP')
+        userPelapor = db.users.find_one({"uId": pelapor['uId']}, {"_id": 0})
+
+        namaPelapor = pelapor['nama']
+        jenisKelaminP = pelapor['jenis_kelamin']
+        noHp = userPelapor['noHp']
+        rtP = userPelapor['rt']
+        rwP = userPelapor['rw']
+        wargaIdP = pelapor['wargaId']
+
+        last_surat = db.surat.find_one(sort=[("suratId", -1)])
+        if last_surat: suratId = last_surat['suratId'] + 1
+        else: suratId = 1  
+        last_riwayat = db.riwayat.find_one(sort=[("riwayatId", -1)])
+        if last_riwayat: riwayatId = last_riwayat['riwayatId'] + 1
+        else: riwayatId = 1 
+
+        jam, menit, detik = gear.get_waktu()
+        hari, bulan, tahun = gear.get_tanggal()
+        kabisat = gear.get_kabisat(bulan)
+
+        data_pelapor = {
+            "Nama": namaPelapor,
+            "Jenis Kelamin" : jenisKelaminP,
+        }
+
+        # ======================================================
+        isi_surat = {
+            "data_pelapor" : data_pelapor,
+            "dokumenBenar" : dokumenBenar,
+            "dokumenSalah" : dokumenSalah,
+            "nomorDokumenBenar" : nomorDokumenBenar,
+            "nomorDokumenSalah" : nomorDokumenSalah,
+            "dataBenar" : dataBenar,
+            "dataSalah" : dataSalah,
+        }
+        # ======================================================
+
+        data_surat = {
+            "nama_pelapor": namaPelapor,
+            "jenis_surat": "Surat Keterangan Orang Yang Sama",
+            "tanggal_pengajuan": f"{hari} {kabisat} {tahun}",
+            "keterangan_surat": keteranganP,
+            "no_hp": noHp,
+            "status_surat": "Menunggu Persetujuan RT",
+            "isi_surat" : isi_surat,
+            "kode_surat" : 0,
+            "rt" : rtP,
+            "rw" : rwP,
+            "wargaId" : wargaIdP,
+            "suratId": suratId,
+        }
+        data_riwayat = {
+            "riwayatId" : riwayatId,
+            "suratId" : suratId,
+            "uId" : uId,
+            "catatan" : "",
+            "status_surat" : "Menunggu Persetujuan RT",
+            "waktu" : f"{jam}:{menit}:{detik} • {hari} {kabisat} {tahun}"
+        }
+        try:
+            db.surat.insert_one(data_surat)
+            db.riwayat.insert_one(data_riwayat)
+            return jsonify(status='sukses', message="Permohonan Surat Orang Yang Sama telah dikirimkan")
+        except Exception as e:
+            print("Gagal:", str(e))
+            return jsonify(status='gagal', message="Permohonan Surat Orang Yang Sama gagal dikirimkan")
+    else :
+        return jsonify(status='gagal', message="Hanya dapat menggunakan NIK yang terdaftar pada KK")
+
 @app.route("/post_suket_pindah_wilayah", methods=['POST'])
 @jwt_required()
 def post_suket_pindah_wilayah():
@@ -1405,8 +1493,10 @@ def update_surat_accept():
     user = db.users.find_one({'uId' : uId}, {'_id' : 0})
     suratId = request.form.get('suratId')
     suratId = int(suratId)
+    
     riw = db.riwayat.find_one({'suratId' : suratId}, {"_id" : 0}, sort=[('waktu', -1)])
     uIdRiwayat = riw['uId']
+    
     catatan = request.form.get('catatan')
 
     jam, menit, detik = gear.get_waktu()
@@ -1441,6 +1531,131 @@ def update_surat_accept():
                 "waktu" : f"{jam}:{menit}:{detik} • {hari} {kabisat} {tahun}"
             }
             db.riwayat.insert_one(data_riwayat)
+            return jsonify(status='sukses', message="Berhasil diperbaharui"), 200
+        elif(user['jabatan'] == "Lurah"):
+            
+            kode_surat = 1
+            
+            sur = db.surat.find_one({'suratId' : suratId}, {'_id' :0})
+            jenSur = sur['jenis_surat']
+            isiSur = sur['isi_surat']
+            
+            data_riwayat = {
+                "riwayatId" : riwayatId,
+                "suratId" : suratId,
+                "uId" : uIdRiwayat,
+                "catatan" : catatan,
+                "status_surat" : "Surat Disetujui",
+                "waktu" : f"{jam}:{menit}:{detik} • {hari} {kabisat} {tahun}"
+            }
+            db.riwayat.insert_one(data_riwayat)
+            if jenSur == "Surat Keterangan Tidak Mampu" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Tidak Mampu", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                stm.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", romawi, tahun, isiSur['data_pelapor'], isiSur['data_pelapor']['Alamat'],sur['rt'], sur['rw'], sur['keterangan_surat'])
+                
+            elif jenSur == "Surat Keterangan Penghasilan" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Penghasilan", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                sp.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", romawi, tahun, isiSur['data_pelapor'], sur['rt'], sur['rw'], isiSur['penghasilanP'], sur['keterangan_surat'])
+                
+            elif jenSur == "Surat Keterangan Kematian" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Kematian", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                sk.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", romawi, tahun, isiSur['data_terlapor'], isiSur['data_hari_meninggal'], isiSur['data_pelapor'])
+                
+            elif jenSur == "Surat Keterangan Domisili" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Domisili", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                sd.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", sur['rt'], sur['rw'], isiSur['data_pelapor']['Alamat'], romawi, tahun, isiSur['data_pelapor'], sur['keterangan_surat'])
+                
+            elif jenSur == "Surat Keterangan Pindah Wilayah" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Pindah Wilayah", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                spw.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", romawi, tahun, isiSur['data_pelapor']['Alamat'], sur['rw'], sur['rt'], isiSur['data_pelapor'], isiSur['nomorSPKTP'], isiSur['tglSPKTP'], sur['keterangan_surat'])
+                
+            elif jenSur == "Surat Keterangan Orang Yang Sama" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Orang Yang Sama", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                soys.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", romawi, tahun, isiSur['data_pelapor'], isiSur['dataBenar'], isiSur['dataSalah'], isiSur['dokumenBenar'], isiSur['dokumenSalah'], isiSur['nomorDokumenBenar'], isiSur['nomorDokumenSalah'], sur['keterangan_surat'])
+                
+            elif jenSur == "Surat Keterangan Tanggungan Keluarga" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Tanggungan Keluarga", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                
+                tanggunganKeluarga = {};
+                x = 1;
+                for tanggungan in isiSur["tanggungan_data"] :
+                    tanggunganKeluarga[f'{x}'] = tanggungan
+                    x += 1
+                
+                print(f"SALMAN ================================================================= {tanggunganKeluarga}")
+                stk.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, romawi, tahun, f"{hari} {kabisat} {tahun}", sur['tanggal_pengajuan'], isiSur['data_pelapor'], tanggunganKeluarga, sur['keterangan_surat'])
+                
+            db.surat.update_one({'suratId' : suratId}, {'$set' : {'status_surat' : 'Surat Disetujui', 'kode_surat' : kode_surat}})
             return jsonify(status='sukses', message="Berhasil diperbaharui"), 200
     except:
         print("Gagal:", str(e))
@@ -1489,6 +1704,18 @@ def update_surat_reject():
                 "uId" : uIdRiwayat,
                 "catatan" : catatan,
                 "status_surat" : "Ditolak RW",
+                "waktu" : f"{jam}:{menit}:{detik} • {hari} {kabisat} {tahun}"
+            }
+            db.riwayat.insert_one(data_riwayat)
+            return jsonify(status='sukses', message="Berhasil diperbaharui"), 200
+        elif(user['jabatan'] == "Lurah"):
+            db.surat.update_one({'suratId' : suratId}, {'$set' : {'status_surat' : 'Ditolak Lurah'}})
+            data_riwayat = {
+                "riwayatId" : riwayatId,
+                "suratId" : suratId,
+                "uId" : uIdRiwayat,
+                "catatan" : catatan,
+                "status_surat" : "Ditolak Lurah",
                 "waktu" : f"{jam}:{menit}:{detik} • {hari} {kabisat} {tahun}"
             }
             db.riwayat.insert_one(data_riwayat)
@@ -1638,6 +1865,30 @@ def get_riwayat():
                 print(f"Surat dengan suratId {x['suratId']} tidak ditemukan.")
 
     return jsonify(status= 'sukses', riwayat = detail_surat)
+
+@app.route("/get_all_riwayat", methods=['GET'])
+@jwt_required()
+@limiter.limit("20 per minute")
+def get_all_riwayat():
+    data = list(db.riwayat.find({}, {"_id": 0}))
+    detail_surat = []
+    for x in data:
+        surat = db.surat.find_one({'suratId': x['suratId']}, {"_id": 0})
+        if surat:  # Pastikan surat ditemukan
+            detail = {
+                "suratId": x['suratId'],
+                "riwayatId": x['riwayatId'],
+                "catatan": x['catatan'],
+                "waktu": x['waktu'],
+                "status_surat": x['status_surat'],
+                "jenis_surat": surat.get('jenis_surat', 'Jenis surat tidak ditemukan'),
+                "tanggal_pengajuan": surat.get('tanggal_pengajuan', 'Tanggal tidak ditemukan'),
+            }
+            detail_surat.append(detail)
+        else:
+            print(f"Surat dengan suratId {x['suratId']} tidak ditemukan.")
+
+    return jsonify(status= 'sukses', riwayat = detail_surat)
 #GET
 
 #DELETE
@@ -1675,6 +1926,43 @@ def del_rekom():
     except:
         return jsonify(status='gagal', message = "Gagal ditolak")
 #DELETE
+
+
+# ---------------------Kode Tambahan---------------------
+@app.route('/api/get_pdf/<jenis_surat>/<kode_surat>', methods=['GET'])
+@jwt_required()
+def get_pdf(jenis_surat, kode_surat):
+    try:
+        file_path = f"static/file/{jenis_surat}-{kode_surat}.pdf"
+        return send_file(file_path, as_attachment=False)
+    except FileNotFoundError:
+        return jsonify(status='gagal', message="File tidak ditemukan"), 404
+    
+@app.route("/update_status_surat", methods=['POST'])
+@jwt_required()
+@limiter.limit("20 per minute")
+def update_status_surat():
+    # Ambil jabatan dari form
+    statusSurat = request.form.get('status_surat')
+    suratId = request.form.get('suratId')
+    suratId = int(suratId)
+    
+    x = db.surat.find_one({"suratId": suratId}, {"_id" : 0})
+    user = db.surat.find_one({"suratId": x['suratId']}, {"_id" : 0})
+    suratId = user['suratId']
+    
+    if not statusSurat:
+        return jsonify(status='gagal', message="Status Surat tidak boleh kosong"), 400
+
+    try:
+        # Update field jabatan saja
+        # db.warga.update_one({"suratId": suratId}, {"$set": {"jabatan": jabatan}})
+        db.surat.update_one({"suratId": suratId}, {"$set": {"status_surat": statusSurat}})
+        return jsonify(status='sukses', message="Status surat berhasil diperbaharui"), 200
+    except Exception as e:
+        print("Gagal:", str(e))
+        return jsonify(status='gagal', message="Gagal memperbaharui jabatan"), 500
+
 
 
 if __name__ == "__main__":

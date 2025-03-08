@@ -41,7 +41,7 @@ elif bulan == "12" :
 else:
   romawi = "Terjadi kesalahan"
 
-def create_pdf(file_path, no_surat, tanggal, romawi, tahun, pelapor, nik, noKK, dokumen, no_dokumen, tgl_dokumen, nama_dokumen, keterangan):
+def create_pdf(file_path, no_surat, tanggal, romawi, tahun, pelapor, dataBenar, dataSalah, dokumenBenar, dokumenSalah, nomorDokumenBenar, nomorDokumenSalah, keterangan):
     doc = BaseDocTemplate(file_path, pagesize=head.F4)
     frame = Frame(doc.leftMargin, doc.bottomMargin, width=doc.width, height=doc.height - 1.8 * cm, leftPadding=4, rightPadding=3, id='normal')
     template = PageTemplate(id='header_footer', frames=frame, onPage=head.header_footer)
@@ -56,7 +56,7 @@ def create_pdf(file_path, no_surat, tanggal, romawi, tahun, pelapor, nik, noKK, 
 
     table.table_normal_dalam(elements, pelapor, align.justify_with_leading(12, 0, 1), 0.2*cm)
 
-    text2 = f"<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Berdasarkan surat pernyataan dari yang bersangkutan, benar nama {pelapor['Nama']} yang tertera pada KTP dengan NIK. {nik}, KK No.{noKK} dan pada {dokumen} No. {no_dokumen} tanggal {tgl_dokumen} dengan nama {nama_dokumen} adalah orang yang sama. Adapun Data yang benar adalah pada KTP dan KK."
+    text2 = f"<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Berdasarkan surat pernyataan dari yang bersangkutan, benar nama {dataBenar} yang tertera pada {dokumenBenar} dengan No. {nomorDokumenBenar} dan pada {dokumenSalah} dengan No. {nomorDokumenSalah} dengan nama {dataSalah} adalah orang yang sama. Adapun Data yang benar adalah <b>{dataBenar}</b> pada {dokumenBenar}."
     elements.append(Paragraph(text2, align.justify_with_leading(12,0,1.5)))
 
     text4 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Demikianlah surat keterangan ini diberikan kepada yang bersangkutan untuk <b>{keterangan}</b>."
@@ -66,8 +66,8 @@ def create_pdf(file_path, no_surat, tanggal, romawi, tahun, pelapor, nik, noKK, 
 
     doc.build(elements)
 
-data_pelapor = {
-      "Nama" : "<b>Salman En</b>",
-      "Jenis Kelamin" : "Laki-Laki",
-    }
-create_pdf("static/file/suket_orang_yang_sama.pdf", "2", "12 Oktober 2024", romawi, tahun, data_pelapor,"123412412412", "123412312", "Ijazah SMA", "2311", "10 Oktober 2018", "Salma En","gugatan perceraian")
+# data_pelapor = {
+#       "Nama" : "<b>Salman En</b>",
+#       "Jenis Kelamin" : "Laki-Laki",
+#     }
+# create_pdf("static/file/suket_orang_yang_sama.pdf", "2", "12 Oktober 2024", romawi, tahun, data_pelapor,"123412412412", "123412312", "Ijazah SMA", "2311", "10 Oktober 2018", "Salma En","gugatan perceraian")
