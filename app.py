@@ -3,7 +3,7 @@ import hashlib
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
-from flask import Flask, json, jsonify, request, url_for, render_template
+from flask import Flask, json, jsonify, request, send_file, url_for, render_template
 from flask_mail import Mail, Message
 from flask_jwt_extended import JWTManager, create_access_token, decode_token, jwt_required, get_jwt_identity, get_jwt
 from werkzeug.utils import secure_filename
@@ -25,10 +25,12 @@ import gear as gear
 app = Flask(__name__)
 CORS(app)
 
-UPLOAD_FOLDER = 'static/image/'
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
-
+UPLOAD_FOLDER_1 = 'static/prfl/'
+UPLOAD_FOLDER_2 = 'static/gnkk/'
+if not os.path.exists(UPLOAD_FOLDER_1):
+    os.makedirs(UPLOAD_FOLDER_1)
+if not os.path.exists(UPLOAD_FOLDER_2):
+    os.makedirs(UPLOAD_FOLDER_2)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_TLS'] = False
@@ -38,7 +40,8 @@ app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
 
 app.config['JWT_SECRET_KEY'] = 'SAMS'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(weeks=260)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER_1'] = UPLOAD_FOLDER_1
+app.config['UPLOAD_FOLDER_2'] = UPLOAD_FOLDER_2
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
@@ -145,10 +148,11 @@ def revoked_token_callback(jwt_header, jwt_payload):
 @limiter.limit("20 per minute")
 def post_users():
     last_user = db.users.find_one(sort=[("uId", -1)])
-    if last_user:
-        new_uId = last_user['uId'] + 1
-    else:
-        new_uId = 1
+    last_permit = db.permitted.find_one(sort=[("uId", -1)])
+    
+    new_permit = last_permit['pId'] + 1 if last_permit else 1
+    new_uId = last_user['uId'] + 1 if last_user else 1
+
     email = request.form.get('email')
     noKK = request.form.get('noKK')
     password = request.form.get('password')
@@ -180,7 +184,13 @@ def post_users():
           "rt": rt,
           "rw": rw
       }
+      permit = {
+        "pId" : new_permit,
+        "uId" : new_uId,
+        "status" : "Menunggu"
+      }
       db.users.insert_one(data)
+      db.permitted.insert_one(permit)
       return jsonify({'status': 'sukses', 'message' : 'Akun berhasil didaftarkan'})
 
 @app.route("/post_rekom", methods=['POST'])
@@ -1244,7 +1254,7 @@ def update_user():
         formatted_time = now.strftime("PRFL_%d%m%Y:%H:%M:%S")
         file_extension = poto_profil.filename.split('.')[-1]
         filename = secure_filename(f"{formatted_time}.{file_extension}")
-        image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        image_path = os.path.join(app.config['UPLOAD_FOLDER_1'], filename)
         poto_profil.save(image_path)
     else:
         image_path = profil_default
@@ -1262,6 +1272,21 @@ def update_user():
         print("Gagal:", str(e))
         return jsonify(status='gagal', message="Gagal memperbaharui profil"), 500
 
+@app.route('/update_permission', methods=['POST'])
+@jwt_required()
+@limiter.limit("20 per minute")
+def update_permission():
+    current_user = get_jwt_identity()
+    uId = current_user['uId']
+    uId = int(uId)
+    stat = request.form.get('status')
+    try:
+        db.permitted.update_one({"uId": uId}, {"$set" : {"status" : stat}})
+        return jsonify(status='sukses', message="Perizinan berhasil diperbaharui"), 200
+    except Exception as e:
+        print("Gagal:", str(e))
+        return jsonify(status='gagal', message="Gagal memperbaharui perizinan"), 500
+
 @app.route('/update_user_kk', methods=['POST'])
 @jwt_required()
 @limiter.limit("20 per minute")
@@ -1278,7 +1303,7 @@ def update_user_kk():
         formatted_time = now.strftime("GNKK_%d%m%Y:%H:%M:%S")
         file_extension = gambarKK.filename.split('.')[-1]
         filename = secure_filename(f"{formatted_time}.{file_extension}")
-        gambar = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        gambar = os.path.join(app.config['UPLOAD_FOLDER_2'], filename)
         gambarKK.save(gambar)
     else:
         return jsonify(status='gagal', message='File kk_gambar tidak ditemukan'), 200
@@ -1643,10 +1668,21 @@ def update_surat_reject():
 
 #GET
 @app.route("/get_users", methods=['GET'])
+@jwt_required()
 @limiter.limit("20 per minute")
 def get_users():
     data = list(db.users.find({}, {"_id": 0}))
     return jsonify(status= 'sukses', users = data)
+
+@app.route("/get_permission", methods=['GET'])
+@jwt_required()
+@limiter.limit("20 per minute")
+def get_permission():
+    current_user = get_jwt_identity()
+    uId = current_user['uId']
+    data = db.permitted.find_one({"uId" : uId})
+    data = serialize_mongo_data(data)
+    return jsonify(status= 'sukses', permission = data)
 
 @app.route("/get_user_personal", methods=['GET'])
 @jwt_required()
