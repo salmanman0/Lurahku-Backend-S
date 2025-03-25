@@ -1,4 +1,6 @@
+import uuid
 from datetime import timedelta, datetime
+import locale
 import hashlib
 import os
 from os.path import join, dirname
@@ -75,8 +77,13 @@ def handle_file_size_error(e):
 def index():
     return "yeah"
 
-from flask_mail import Message
-
+def generate_short_token():
+    while True:
+        short_token = str(uuid.uuid4())[:8]
+        existing_token = db.tokens.find_one({'short_token': short_token})
+        if not existing_token:
+            return short_token
+        
 @app.route('/forgot-password', methods=['POST'])
 def forgot_password():
     email = request.form.get('email')
@@ -86,8 +93,16 @@ def forgot_password():
             return jsonify(message='Email tidak terdaftar!', status="gagal")
         
         reset_token = create_access_token(identity={'noKK': user['noKK']}, expires_delta=timedelta(minutes=5))
-        reset_link = url_for('reset_password', token=reset_token, _external=True)
-
+        short_token = generate_short_token()
+        locale.setlocale(locale.LC_TIME, 'id_ID.utf8')
+        db.tokens.insert_one({
+            'short_token': short_token,
+            'full_token': reset_token,
+            'akun' : user['noKK'],
+            'waktu' : datetime.now().strftime('%d %B %Y, %H:%M WIB'),
+            'status': "Belum diubah"
+        })
+        reset_link = url_for('reset_password', token=short_token, _external=True)
         msg = Message(
             '🔒 Atur Ulang Kata Sandi - Lurahku',
             sender='salman21ti@mahasiswa.pcr.ac.id',
@@ -95,7 +110,7 @@ def forgot_password():
         )
         
         msg.body = f"""
-            Halo {user["email"]},
+            Halo Warga,
 
             Kami menerima permintaan untuk mengatur ulang kata sandi akun Anda.  
             Silakan klik tautan di bawah ini untuk melanjutkan proses reset kata sandi:
@@ -139,7 +154,7 @@ def forgot_password():
             <body>
                 <div class="container">
                     <h2>🔒 Atur Ulang Kata Sandi</h2>
-                    <p>Halo <strong>{user.get('nama', 'Pengguna')}</strong>,</p>
+                    <p>Halo <strong>Warga!</strong></p>
                     <p>Kami menerima permintaan untuk mengatur ulang kata sandi akun Anda. Klik tombol di bawah ini untuk melanjutkan:</p>
                     <p><a href="{reset_link}" class="btn"><span style="color:#fff">Atur Ulang Kata Sandi<span></a></p>
                     <p><small>Jika tombol tidak berfungsi, Anda juga dapat mengklik tautan berikut:</small></p>
@@ -165,17 +180,20 @@ def forgot_password():
 def reset_password(token):
     if request.method == "POST":
         try:
-            current_user = decode_token(token)  # Decode token langsung
-            user_id = current_user['sub']['noKK']  # Mengambil noKK dari token
+            token_entry = db.tokens.find_one({'short_token': token})
+            full_token = token_entry['full_token']
+            current_user = decode_token(full_token)  
+            user_id = current_user['sub']['noKK']  
             new_password = request.json.get('password')
             if not new_password:
                 return jsonify({'message': 'Password tidak boleh kosong!'}), 400
 
             hashed_password = hashlib.sha256(new_password.encode('utf-8')).hexdigest()
             db.users.update_one({'noKK': user_id}, {'$set': {'password': hashed_password}})
+            db.tokens.update_one({'short_token': token}, {'$set': {'status': "Telah diubah"}})
             return jsonify({'message': 'Password berhasil direset!'}), 200
         except Exception as e:
-            return jsonify({'message': 'Token sudah kedaluwarsa, silahkan minta ulang password', 'error': str(e)}), 400
+            return jsonify({'message': 'Token telah kedaluwarsa', 'error': str(e)}), 400
     return render_template('reset_password.html', token=token)
 
 @app.route("/login", methods=['POST'])
