@@ -75,6 +75,8 @@ def handle_file_size_error(e):
 def index():
     return "yeah"
 
+from flask_mail import Message
+
 @app.route('/forgot-password', methods=['POST'])
 def forgot_password():
     email = request.form.get('email')
@@ -85,15 +87,79 @@ def forgot_password():
         
         reset_token = create_access_token(identity={'noKK': user['noKK']}, expires_delta=timedelta(minutes=5))
         reset_link = url_for('reset_password', token=reset_token, _external=True)
-        msg = Message('Atur Ulang Password', sender='salman21ti@mahasiswa.pcr.ac.id', recipients=[email])
-        msg.body = f'Klik link berikut untuk mengatur ulang password Anda:\n{reset_link}\n\nLink ini hanya berlaku dalam 5 menit'
-        mail.send(msg)
+
+        msg = Message(
+            '🔒 Atur Ulang Kata Sandi - Lurahku',
+            sender='salman21ti@mahasiswa.pcr.ac.id',
+            recipients=[email]
+        )
         
-        return jsonify(message='Email atur ulang password telah dikirim!', status="sukses"), 200
+        msg.body = f"""
+            Halo {user["email"]},
+
+            Kami menerima permintaan untuk mengatur ulang kata sandi akun Anda.  
+            Silakan klik tautan di bawah ini untuk melanjutkan proses reset kata sandi:
+
+            {reset_link}
+
+            ⚠️ *Tautan ini hanya berlaku selama 5 menit.* Jika Anda tidak meminta reset kata sandi, abaikan email ini.
+
+            Salam,  
+            Tim Dukungan Lurahku
+        """
+
+        msg.html = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    .container {{
+                        font-family: Arial, sans-serif;
+                        max-width: 600px;
+                        margin: auto;
+                        padding: 20px;
+                        border: 1px solid #ddd;
+                        border-radius: 8px;
+                    }}
+                    .btn {{
+                        display: inline-block;
+                        padding: 10px 20px;
+                        color: #fff;
+                        background-color: #007bff;
+                        text-decoration: none;
+                        border-radius: 5px;
+                    }}
+                    .footer {{
+                        font-size: 12px;
+                        color: #666;
+                        margin-top: 20px;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h2>🔒 Atur Ulang Kata Sandi</h2>
+                    <p>Halo <strong>{user.get('nama', 'Pengguna')}</strong>,</p>
+                    <p>Kami menerima permintaan untuk mengatur ulang kata sandi akun Anda. Klik tombol di bawah ini untuk melanjutkan:</p>
+                    <p><a href="{reset_link}" class="btn"><span style="color:#fff">Atur Ulang Kata Sandi<span></a></p>
+                    <p><small>Jika tombol tidak berfungsi, Anda juga dapat mengklik tautan berikut:</small></p>
+                    <p><a href="{reset_link}">{reset_link}</a></p>
+                    <p><strong>⚠️ Tautan ini hanya berlaku selama 5 menit.</strong></p>
+                    <hr>
+                    <p class="footer">Jika Anda tidak meminta pengaturan ulang kata sandi, abaikan email ini. Hubungi kami jika Anda memerlukan bantuan lebih lanjut.</p>
+                    <p class="footer">Salam, <br>Developer Team Lurahku</p>
+                </div>
+            </body>
+            </html>
+        """
+
+        mail.send(msg)
+        return jsonify(message='Email atur ulang kata sandi telah dikirim!', status="sukses"), 200
     
     except Exception as e:
-        print(f"Error occurred: {str(e)}")  # Cetak error untuk debugging
+        print(f"Error occurred: {str(e)}")
         return jsonify(message='Terjadi kesalahan, silakan coba lagi.', status="gagal")
+
 
 @app.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
@@ -1668,7 +1734,7 @@ def update_surat_reject():
 
 #GET
 @app.route("/get_users", methods=['GET'])
-@jwt_required()
+# @jwt_required()
 @limiter.limit("20 per minute")
 def get_users():
     data = list(db.users.find({}, {"_id": 0}))
