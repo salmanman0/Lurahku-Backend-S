@@ -1,4 +1,5 @@
 import uuid
+import locale
 from datetime import timedelta, datetime
 import hashlib
 import os
@@ -93,10 +94,12 @@ def forgot_password():
         
         reset_token = create_access_token(identity={'noKK': user['noKK']}, expires_delta=timedelta(minutes=5))
         short_token = generate_short_token()
+        locale.setlocale(locale.LC_TIME, 'id_ID.utf8')
         db.tokens.insert_one({
             'short_token': short_token,
             'full_token': reset_token,
             'akun' : user['noKK'],
+            'waktu' : datetime.now().strftime('%d %B %Y, %H:%M'),
             'status': "Belum diubah",
             'lokasi':""
         })
