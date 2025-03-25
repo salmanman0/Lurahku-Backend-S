@@ -100,7 +100,8 @@ def forgot_password():
             'full_token': reset_token,
             'akun' : user['noKK'],
             'waktu' : datetime.now().strftime('%d %B %Y, %H:%M WIB'),
-            'status': "Belum diubah"
+            'status': "Belum diubah",
+            # 'lokasi'
         })
         reset_link = url_for('reset_password', token=short_token, _external=True)
         msg = Message(
@@ -181,19 +182,27 @@ def reset_password(token):
     if request.method == "POST":
         try:
             token_entry = db.tokens.find_one({'short_token': token})
+            if not token_entry:
+                return jsonify({'message': 'Token tidak valid atau telah kedaluwarsa'}), 400
+
             full_token = token_entry['full_token']
             current_user = decode_token(full_token)  
             user_id = current_user['sub']['noKK']  
+
             new_password = request.json.get('password')
+            latlong = request.json.get('latlong')
+
             if not new_password:
                 return jsonify({'message': 'Password tidak boleh kosong!'}), 400
 
             hashed_password = hashlib.sha256(new_password.encode('utf-8')).hexdigest()
             db.users.update_one({'noKK': user_id}, {'$set': {'password': hashed_password}})
-            db.tokens.update_one({'short_token': token}, {'$set': {'status': "Telah diubah"}})
+            db.tokens.update_one({'short_token': token}, {'$set': {'status': "Telah diubah", 'lokasi': latlong}})
+
             return jsonify({'message': 'Password berhasil direset!'}), 200
         except Exception as e:
-            return jsonify({'message': 'Token telah kedaluwarsa', 'error': str(e)}), 400
+            return jsonify({'message': 'Terjadi kesalahan', 'error': str(e)}), 400
+
     return render_template('reset_password.html', token=token)
 
 @app.route("/login", methods=['POST'])
