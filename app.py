@@ -1,6 +1,5 @@
 import uuid
 from datetime import timedelta, datetime
-import locale
 import hashlib
 import os
 from os.path import join, dirname
@@ -94,14 +93,12 @@ def forgot_password():
         
         reset_token = create_access_token(identity={'noKK': user['noKK']}, expires_delta=timedelta(minutes=5))
         short_token = generate_short_token()
-        locale.setlocale(locale.LC_TIME, 'id_ID.utf8')
         db.tokens.insert_one({
             'short_token': short_token,
             'full_token': reset_token,
             'akun' : user['noKK'],
-            'waktu' : datetime.now().strftime('%d %B %Y, %H:%M WIB'),
             'status': "Belum diubah",
-            # 'lokasi'
+            'lokasi':""
         })
         reset_link = url_for('reset_password', token=short_token, _external=True)
         msg = Message(
@@ -184,14 +181,11 @@ def reset_password(token):
             token_entry = db.tokens.find_one({'short_token': token})
             if not token_entry:
                 return jsonify({'message': 'Token tidak valid atau telah kedaluwarsa'}), 400
-
             full_token = token_entry['full_token']
             current_user = decode_token(full_token)  
             user_id = current_user['sub']['noKK']  
-
             new_password = request.json.get('password')
             latlong = request.json.get('latlong')
-
             if not new_password:
                 return jsonify({'message': 'Password tidak boleh kosong!'}), 400
 
