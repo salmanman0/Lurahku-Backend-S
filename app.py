@@ -292,24 +292,29 @@ def post_rekom():
     last_user = db.rekom.find_one(sort=[("rekomId", -1)])
     if last_user: new_rekomId = last_user['rekomId'] + 1
     else: new_rekomId = 1
-    rw = request.form.get('rw')
-    rt = request.form.get('rt')
-    newData = {
-        "uId" : uId,
-        "rt" : rt,
-        "rw" : rw,
-        "status" : "menunggu",
-        "rekomId" : new_rekomId,
-    }
-    user = db.rekom.find_one({"uId" : uId})
-    if user :
-        return jsonify(status="perhatian", message="Anda telah melakukan rekomendasi")
-    else :
-        try: 
-            db.rekom.insert_one(newData)
-            return jsonify(status="sukses", message="Rekomendasi anda telah terkirim")
-        except :
-            return jsonify(status="gagal", message="Rekomendasi anda gagal terkirim")
+
+    kepala_keluarga = db.warga.find_one({"uId" : uId, "peran" : "Kepala Keluarga"})
+    if kepala_keluarga: 
+        rw = request.form.get('rw')
+        rt = request.form.get('rt')
+        newData = {
+            "uId" : uId,
+            "rt" : rt,
+            "rw" : rw,
+            "status" : "menunggu",
+            "rekomId" : new_rekomId,
+        }
+        user = db.rekom.find_one({"uId" : uId})
+        if user :
+            return jsonify(status="perhatian", message="Anda telah melakukan rekomendasi")
+        else :
+            try: 
+                db.rekom.insert_one(newData)
+                return jsonify(status="sukses", message="Rekomendasi anda telah terkirim")
+            except :
+                return jsonify(status="gagal", message="Rekomendasi anda gagal terkirim")
+    else:
+        return jsonify(status="gagal", message="Anggota keluarga tidak ada yang berperan sebagai Kepala Keluarga")
 
 @app.route("/post_keluarga", methods=['POST'])
 @jwt_required()
@@ -1818,28 +1823,30 @@ def get_rekom():
     rw_user = user['rw']
     data = list(db.rekom.find({"rt" : rt_user, "rw" : rw_user}, {"_id": 0}))
     users = []
-    
+    msg = ""
     for rekom in data :
         if rekom['status'] == "menunggu":
             x = db.users.find_one({"uId" : rekom['uId']}, {"_id" : 0})
             y = db.warga.find_one({'uId' : rekom['uId'], 'peran': "Kepala Keluarga"})
-            user_rekom = {
-            "poto_profil" : x['poto_profil'],
-            "gambar_kk" : x['gambar_kk'],
-            "noHp" : x['noHp'],
-            "noKK" : x['noKK'],
-            "alamat" : x['alamat'],
-            "uId" : rekom['uId'],
-            "rekomId" : rekom['rekomId'],
-            "status" : rekom['status'],
-            "rt" : rekom['rt'],
-            "rw" : rekom['rw'],
-            "nama" : y['nama'],
-            "nik" : y['nik'],
-            }
-            users.append(user_rekom)
-        
-    return jsonify(status= 'sukses', rekom = users)
+            if y :
+                user_rekom = {
+                "poto_profil" : x['poto_profil'],
+                "gambar_kk" : x['gambar_kk'],
+                "noHp" : x['noHp'],
+                "noKK" : x['noKK'],
+                "alamat" : x['alamat'],
+                "uId" : rekom['uId'],
+                "rekomId" : rekom['rekomId'],
+                "status" : rekom['status'],
+                "rt" : rekom['rt'],
+                "rw" : rekom['rw'],
+                "nama" : y['nama'],
+                "nik" : y['nik'],
+                }
+                users.append(user_rekom)
+            else : 
+                msg = "Anggota keluarga tidak memiliki peran Kepala Keluarga"
+    return jsonify(status= 'sukses', rekom = users, msg=msg)
 
 @app.route("/get_rekom_personal", methods=['GET'])
 @jwt_required()
