@@ -343,7 +343,7 @@ def post_users():
           "noHp": noHp,
           "rt": rt,
           "rw": rw,
-          "created_at" : now.strftime('%d %MMMM %Y')
+          "created_at" : now.strftime('%d %B %Y')
       }
       permit = {
         "pId" : new_permit,
