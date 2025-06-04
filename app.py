@@ -323,7 +323,10 @@ def post_users():
     noHp = ""
     rt = "-"
     rw = "-"
+    
+    locale.setlocale(locale.LC_TIME, 'id_ID.UTF-8')
     now = datetime.now()
+    
     checkNoKK = db.users.find_one({'noKK' : noKK})
     checkEamil = db.users.find_one({'email' : email})
     if checkEamil : 
