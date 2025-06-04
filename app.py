@@ -318,7 +318,7 @@ def post_users():
     password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
     gambar_kk = ""
     poto_profil = "static/image/default-person.jpg"
-    jabatan = "Masyarakat"
+    jabatan = request.form.get('jabatan')
     alamat = ""
     noHp = ""
     rt = "-"
