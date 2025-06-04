@@ -323,6 +323,7 @@ def post_users():
     noHp = ""
     rt = "-"
     rw = "-"
+    now = datetime.now()
     checkNoKK = db.users.find_one({'noKK' : noKK})
     checkEamil = db.users.find_one({'email' : email})
     if checkEamil : 
@@ -341,7 +342,8 @@ def post_users():
           "alamat": alamat,
           "noHp": noHp,
           "rt": rt,
-          "rw": rw
+          "rw": rw,
+          "created_at" : now.strftime('%d %m %Y')
       }
       permit = {
         "pId" : new_permit,
