@@ -47,6 +47,10 @@ app.config['UPLOAD_FOLDER_2'] = UPLOAD_FOLDER_2
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
+FCM_SERVER_KEY = "YOUR_FCM_SERVER_KEY"
+FCM_URL = "https://fcm.googleapis.com/fcm/send"
+TOKENS_FILE = "tokens.json"
+
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
@@ -77,6 +81,7 @@ def handle_file_size_error(e):
 def index():
     return "yeah"
 
+# UNDER CONSTRUCTION ===========================
 def generate_short_token():
     while True:
         short_token = str(uuid.uuid4())[:8]
@@ -84,6 +89,70 @@ def generate_short_token():
         if not existing_token:
             return short_token
         
+# Load token dari file (simulasi database)
+def load_tokens():
+    if not os.path.exists(TOKENS_FILE):
+        return {}
+    with open(TOKENS_FILE, 'r') as file:
+        return json.load(file)
+
+# Simpan token ke file
+def save_tokens(tokens):
+    with open(TOKENS_FILE, 'w') as file:
+        json.dump(tokens, file)
+
+@app.route('/save-token', methods=['POST'])
+def save_token():
+    data = request.form or request.json
+    user_id = data.get('userId')
+    token = data.get('token')
+
+    if not user_id or not token:
+        return jsonify({'message': 'userId dan token wajib'}), 400
+
+    tokens = load_tokens()
+    tokens[user_id] = token
+    save_tokens(tokens)
+
+    return jsonify({'message': 'Token disimpan'}), 200
+
+@app.route('/send-notification', methods=['POST'])
+def send_notification():
+    data = request.json
+    user_id = data.get('userId')
+    title = data.get('title')
+    body = data.get('body')
+
+    tokens = load_tokens()
+    token = tokens.get(user_id)
+
+    if not token:
+        return jsonify({'message': 'Token tidak ditemukan untuk userId ini'}), 404
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'key={FCM_SERVER_KEY}',
+    }
+
+    payload = {
+        "to": token,
+        "notification": {
+            "title": title or "Notifikasi Baru",
+            "body": body or "Ada informasi baru",
+        },
+        "priority": "high"
+    }
+
+    response = request.post(FCM_URL, headers=headers, json=payload)
+
+    return jsonify({
+        'message': 'Notifikasi dikirim',
+        'status': response.status_code,
+        'response': response.json()
+    })
+# UNDER CONSTRUCTION ===========================
+
+
 @app.route('/forgot-password', methods=['POST'])
 def forgot_password():
     email = request.form.get('email')
@@ -1366,6 +1435,95 @@ def update_user():
     except Exception as e:
         print("Gagal:", str(e))
         return jsonify(status='gagal', message="Gagal memperbaharui profil"), 500
+
+@app.route("/update_user_admin", methods=['POST'])
+@jwt_required()
+@limiter.limit("20 per minute")
+def update_data_user():
+    target_uId = request.form.get('uId')
+    if not target_uId:
+        return jsonify(status='gagal', message='uId user target wajib diisi'), 400
+    target_uId = int(target_uId)
+
+    # Ambil data user target
+    user_target = db.users.find_one({'uId': target_uId})
+    if not user_target:
+        return jsonify(status='gagal', message='User tidak ditemukan'), 404
+
+    profil_default = user_target['poto_profil']
+    kk_default = user_target['gambar_kk']
+
+    # Ambil semua data input
+    noKK = request.form.get('noKK')
+    email = request.form.get('email')
+    alamat = request.form.get('alamat')
+    noHp = request.form.get('noHp')
+    jabatan = request.form.get('jabatan')
+    rt = request.form.get('rt')
+    rw = request.form.get('rw')
+    password = request.form.get('password')
+
+    # Proses upload poto_profil
+    poto_profil = request.files.get('poto_profil')
+    if poto_profil:
+        now = datetime.now()
+        formatted_time = now.strftime("PRFL_%d%m%Y_%H%M%S")
+        file_extension = poto_profil.filename.split('.')[-1]
+        filename = secure_filename(f"{formatted_time}.{file_extension}")
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        poto_profil.save(image_path)
+    else:
+        image_path = profil_default
+
+    # Proses upload gambar_kk
+    gambar_kk = request.files.get('gambar_kk')
+    if gambar_kk:
+        now = datetime.now()
+        formatted_time = now.strftime("GNKK_%d%m%Y:%H:%M:%S")
+        file_extension = gambar_kk.filename.split('.')[-1]
+        kk_filename = secure_filename(f"{formatted_time}.{file_extension}")
+        kk_path = os.path.join(app.config['UPLOAD_FOLDER'], kk_filename)
+        gambar_kk.save(kk_path)
+    else:
+        kk_path = kk_default
+
+    # Hash password jika diisi
+    if password:
+        hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    else:
+        hashed_password = user_target['password']
+
+    # Data yang akan diupdate
+    data_update = {
+        "noKK": noKK,
+        "email": email,
+        "poto_profil": image_path,
+        "gambar_kk": kk_path,
+        "alamat": alamat,
+        "noHp": noHp,
+        "jabatan": jabatan,
+        "rt": rt,
+        "rw": rw,
+        "password": hashed_password,
+    }
+
+    try:
+        db.users.update_one({"uId": target_uId}, {"$set": data_update})
+        return jsonify(status='sukses', message="Data user berhasil diperbaharui"), 200
+    except Exception as e:
+        print("Gagal:", str(e))
+        return jsonify(status='gagal', message="Gagal memperbaharui data user"), 500
+
+@app.route("/del_surat/<int:suratId>", methods=['POST'])
+@jwt_required()
+@limiter.limit("20 per minute")
+def del_surat(suratId):
+    suratId = int(suratId)
+    try :
+        db.surat.delete_one({"suratId": suratId})
+        return jsonify(status='sukses', message = "Surat berhasil dihapus")
+    except:
+        return jsonify(status='gagal', message = "Surat gagal dihapus")
 
 @app.route('/update_permission', methods=['POST'])
 @jwt_required()
