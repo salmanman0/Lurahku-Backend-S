@@ -1475,7 +1475,7 @@ def update_data_user():
         formatted_time = now.strftime("PRFL_%d%m%Y_%H%M%S")
         file_extension = poto_profil.filename.split('.')[-1]
         filename = secure_filename(f"{formatted_time}.{file_extension}")
-        image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        image_path = os.path.join(app.config['UPLOAD_FOLDER_1'], filename)
         poto_profil.save(image_path)
     else:
         image_path = profil_default
@@ -1487,7 +1487,7 @@ def update_data_user():
         formatted_time = now.strftime("GNKK_%d%m%Y:%H:%M:%S")
         file_extension = gambar_kk.filename.split('.')[-1]
         kk_filename = secure_filename(f"{formatted_time}.{file_extension}")
-        kk_path = os.path.join(app.config['UPLOAD_FOLDER'], kk_filename)
+        kk_path = os.path.join(app.config['UPLOAD_FOLDER_2'], kk_filename)
         gambar_kk.save(kk_path)
     else:
         kk_path = kk_default
