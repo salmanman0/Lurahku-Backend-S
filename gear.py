@@ -7,6 +7,12 @@ from datetime import datetime
 from reportlab.lib.pagesizes import letter
 
 from reportlab.platypus import Image, Spacer
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+pdfmetrics.registerFont(TTFont('Arial', 'fonts/arial.ttf'))
+pdfmetrics.registerFont(TTFont('Arial-Bold', 'fonts/arialbd.ttf'))
+
 
 def get_waktu():
     waktu = datetime.now()
@@ -88,28 +94,28 @@ class Align:
         self.styles = getSampleStyleSheet()
 
     def justify(self, font, space):
-        return ParagraphStyle('justify', parent=self.styles['Normal'], alignment=TA_JUSTIFY, fontName='Times-Roman', fontSize=font, spaceAfter=space)
+        return ParagraphStyle('justify', parent=self.styles['Normal'], alignment=TA_JUSTIFY, fontName='Arial', fontSize=font, spaceAfter=space)
     
     def center(self, font, space):
-        return ParagraphStyle('center', parent=self.styles['Normal'], alignment=1, fontName='Times-Roman', fontSize=font, spaceAfter=space)
+        return ParagraphStyle('center', parent=self.styles['Normal'], alignment=1, fontName='Arial', fontSize=font, spaceAfter=space)
     
     def left(self, font, space):
-        return ParagraphStyle('left', parent=self.styles['Normal'], alignment=TA_LEFT, fontName='Times-Roman', fontSize=font, spaceAfter=space)
+        return ParagraphStyle('left', parent=self.styles['Normal'], alignment=TA_LEFT, fontName='Arial', fontSize=font, spaceAfter=space)
 
     def right(self, font, space):
-        return ParagraphStyle('right', parent=self.styles['Normal'], alignment=TA_RIGHT, fontName='Times-Roman', fontSize=font, spaceAfter=space)
+        return ParagraphStyle('right', parent=self.styles['Normal'], alignment=TA_RIGHT, fontName='Arial', fontSize=font, spaceAfter=space)
 
     def justify_with_leading(self, font, space, lead):
-        return ParagraphStyle('justify', parent=self.styles['Normal'], alignment=TA_JUSTIFY, fontName='Times-Roman', fontSize=font, spaceAfter=space, leading=font*lead)
+        return ParagraphStyle('justify', parent=self.styles['Normal'], alignment=TA_JUSTIFY, fontName='Arial', fontSize=font, spaceAfter=space, leading=font*lead)
     
     def center_with_leading(self, font, space, lead):
-        return ParagraphStyle('center', parent=self.styles['Normal'], alignment=1, fontName='Times-Roman', fontSize=font, spaceAfter=space, leading=font*lead)
+        return ParagraphStyle('center', parent=self.styles['Normal'], alignment=1, fontName='Arial', fontSize=font, spaceAfter=space, leading=font*lead)
     
     def left_with_leading(self, font, space, lead):
-        return ParagraphStyle('left', parent=self.styles['Normal'], alignment=TA_LEFT, fontName='Times-Roman', fontSize=font, spaceAfter=space, leading=font*lead)
+        return ParagraphStyle('left', parent=self.styles['Normal'], alignment=TA_LEFT, fontName='Arial', fontSize=font, spaceAfter=space, leading=font*lead)
 
     def right_with_leading(self, font, space, lead):
-        return ParagraphStyle('right', parent=self.styles['Normal'], alignment=TA_RIGHT, fontName='Times-Roman', fontSize=font, spaceAfter=space, leading=font*lead)
+        return ParagraphStyle('right', parent=self.styles['Normal'], alignment=TA_RIGHT, fontName='Arial', fontSize=font, spaceAfter=space, leading=font*lead)
 
 class Table:
     @staticmethod
@@ -125,7 +131,7 @@ class Table:
             ('ALIGN', (0, 0), (-1, -1), 'LEFT'), 
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-            ('FONTNAME', (0, 0), (-1, -1), 'Times-Roman'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Arial'),
             ('FONTSIZE', (0, 0), (-1, -1), 12),
         ]))
         
@@ -144,7 +150,7 @@ class Table:
             ('ALIGN', (0, 0), (-1, -1), 'LEFT'), 
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-            ('FONTNAME', (0, 0), (-1, -1), 'Times-Roman'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Arial'),
             ('FONTSIZE', (0, 0), (-1, -1), 12),
         ]))
         
@@ -161,7 +167,7 @@ class Table:
             ('ALIGN', (0, 0), (-1, -1), 'LEFT'), 
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-            ('FONTNAME', (0, 0), (-1, -1), 'Times-Roman'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Arial'),
             ('FONTSIZE', (0, 0), (-1, -1), 12),
         ]))
         elements.append(table)
@@ -185,7 +191,7 @@ class Table:
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'), 
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-            ('FONTNAME', (0, 0), (-1, -1), 'Times-Roman'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Arial'),
             ('FONTSIZE', (0, 0), (-1, -1), 12),
             ('GRID', (0, 0), (-1, -1), 1, colors.black)
         ]))
@@ -208,30 +214,27 @@ class HeaderFooter:
         canvas.drawImage(logo_path, margin_left, margin_top - 2.1 * cm, width=3.5 * cm, height=3.5 * cm)
 
         page_width = self.letter[0]
+        center_x = (page_width+(margin_left/2)) / 2  # Posisi tengah horizontal canvas
 
         header_text_1 = "PEMERINTAH KOTA PEKANBARU"
-        text_width_1 = canvas.stringWidth(header_text_1, 'Times-Bold', 12)
         header_text_2 = "KELURAHAN LIMBUNGAN"
-        text_width_2 = canvas.stringWidth(header_text_2, 'Times-Bold', 16)
         header_text_3 = "KECAMATAN RUMBAI TIMUR"
-        text_width_3 = canvas.stringWidth(header_text_3, 'Times-Bold', 12)
         header_text_4 = "Jl. Sembilang – Pekanbaru"
-        text_width_4 = canvas.stringWidth(header_text_4, 'Times-Bold', 10)
         header_text_5 = "Kode Pos. 28261"
-        
-        canvas.setFont('Times-Bold', 12)
-        canvas.drawString(((page_width - text_width_2)+((text_width_1 - 80)/2)) / 2, margin_top+0.5*cm, header_text_1)
 
-        canvas.setFont('Times-Bold', 20)
-        canvas.drawString((page_width- text_width_2) / 2, margin_top - 0.3 * cm, header_text_2)
+        canvas.setFont('Arial-Bold', 14)
+        canvas.drawCentredString(center_x, margin_top + 0.5 * cm, header_text_1)
 
-        canvas.setFont('Times-Bold', 14)
-        canvas.drawString((page_width - text_width_2)-((text_width_3)*1.85) / 2, margin_top - 1 * cm, header_text_3)
+        canvas.setFont('Arial-Bold', 22)
+        canvas.drawCentredString(center_x, margin_top - 0.3 * cm, header_text_2)
 
-        canvas.setFont('Times-Bold', 10)
-        canvas.drawString((page_width - text_width_2)-((text_width_4)*2)/2, margin_top - 1.5 * cm, header_text_4)
+        canvas.setFont('Arial-Bold', 16)
+        canvas.drawCentredString(center_x, margin_top - 1 * cm, header_text_3)
 
-        canvas.setFont('Times-Roman', 10)
+        canvas.setFont('Arial-Bold', 12)
+        canvas.drawCentredString(center_x, margin_top - 1.5 * cm, header_text_4)
+
+        canvas.setFont('Arial', 12)
         canvas.drawString(margin_left + 14.5 * cm, margin_top - 2 * cm, header_text_5)
 
         canvas.setStrokeColor(colors.black)
@@ -242,6 +245,7 @@ class HeaderFooter:
         canvas.restoreState()
 
 
+
 import socket
 
 def get_local_ip():
@@ -250,19 +254,51 @@ def get_local_ip():
     return ip_address
 
 class TandaTangan:
-    def tanda_tangan(self, elements, tanggal, align_style) :
-        # Teks sebelum tanda tangan
-        ttd_awal = f"Pekanbaru, {tanggal}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/><b>LURAH LIMBUNGAN</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-        elements.append(Paragraph(ttd_awal, align_style))
-        
-        # ip_server = get_local_ip()
-        
-        # Menambahkan gambar tanda tangan
-        path_ttd_image = "/static/image/ttd.png"  # Ganti dengan path ke file gambar tanda tangan Anda
+    def tanda_tangan(self, elements, tanggal, align_style):
+        # Style untuk paragraf rata kiri
+        left_style = ParagraphStyle(
+            name='LeftAlign',
+            parent=align_style,
+            alignment=TA_LEFT,
+            leftIndent=50
+        )
+
+        # Komponen teks dan gambar
+        ttd_awal = Paragraph(f"Pekanbaru, {tanggal}<br/><b>LURAH LIMBUNGAN</b>", left_style)
+
+        path_ttd_image = "/static/image/ttd.png"
         img_url = f"https://kelurahan-limbungan.pocari.id{path_ttd_image}"
-        img = Image(img_url, width=200, height=100, hAlign='RIGHT')  # hAlign='RIGHT' untuk menggeser ke kanan
-        elements.append(img)
-        
-        # Menambahkan teks setelah tanda tangan
-        ttd_akhir = f"<b><u>WELFINASARI HARAHAP, S.Sos, M.M.</u></b><br/>NIP. 19840611 200801 2 007&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-        elements.append(Paragraph(ttd_akhir, align_style))
+        img = Image(img_url, width=200, height=100)  # Tanpa hAlign, karena sudah diatur oleh tabel
+        img.spaceBefore = -20
+
+        ttd_akhir = Paragraph(
+            "<b><u>WELFINASARI HARAHAP, S.Sos, M.M.</u></b><br/>"
+            "NIP. 19840611 200801 2 007",
+            ParagraphStyle(
+                name="TTDAkhir",
+                parent=left_style,
+                spaceBefore=-10  # Nilai negatif akan mengangkat teks ke atas, sehingga tertimpa gambar
+            )
+        )
+
+
+        # Susun konten kolom kedua
+        kolom_kedua = [ttd_awal, img, ttd_akhir]
+
+        # Buat tabel 2 kolom: kolom 1 kosong, kolom 2 berisi tanda tangan
+        data = [
+            ["", kolom_kedua]
+        ]
+
+        table = PlatypusTable(data, colWidths=[200, 300])  # Atur lebar kolom sesuai kebutuhan
+        table.setStyle(TableStyle([
+            ("VALIGN", (1, 0), (1, 0), "TOP"),          # Konten kolom 2 dari atas
+            ("ALIGN", (1, 0), (1, 0), "CENTER"),        # Gambar di tengah kolom
+            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("TOPPADDING", (0, 0), (-1, -1), 0),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ])) 
+
+        # Tambahkan tabel ke elemen PDF
+        elements.append(table)

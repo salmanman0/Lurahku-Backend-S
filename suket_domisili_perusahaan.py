@@ -52,4 +52,4 @@ domisili_perusahaan = {
 
 nomor_surat = 650
 
-create_pdf("static/file/suket_domisili_perusahaan.pdf",nomor_surat, "12 Oktober 2024", "X", "2004", "ILHAM JR", "12", "12 Oktober 2007", "02", "10", data_perusahaan, domisili_perusahaan, "mamam tu mamam")
+# create_pdf("static/file/suket_domisili_perusahaan.pdf",nomor_surat, "12 Oktober 2024", "X", "2004", "ILHAM JR", "12", "12 Oktober 2007", "02", "10", data_perusahaan, domisili_perusahaan, "mamam tu mamam")
