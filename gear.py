@@ -10,8 +10,8 @@ from reportlab.platypus import Image, Spacer
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
-pdfmetrics.registerFont(TTFont('Arial', 'fonts/arial.ttf'))
-pdfmetrics.registerFont(TTFont('Arial-Bold', 'fonts/arialbd.ttf'))
+pdfmetrics.registerFont(TTFont('Arial', 'fonts/ARIAL.TTF'))
+pdfmetrics.registerFont(TTFont('Arial-Bold', 'fonts/ARIALBD.TTF'))
 
 
 def get_waktu():
