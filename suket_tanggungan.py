@@ -9,7 +9,7 @@ head = HeaderFooter()
 ttd = TandaTangan()
 
 def create_pdf(file_path, no_surat, romawi, tahun, tanggal, tgl_pengajuan, pelapor, tanggungan_data, keterangan):
-    doc = BaseDocTemplate(file_path, pagesize=head.F4)
+    doc = BaseDocTemplate(file_path, pagesize=head.letter)
     frame = Frame(doc.leftMargin, doc.bottomMargin, width=doc.width, height=doc.height - 1.8 * cm, leftPadding=4, rightPadding=3, id='normal')
     template = PageTemplate(id='header_footer', frames=frame, onPage=head.header_footer)
     doc.addPageTemplates([template])
