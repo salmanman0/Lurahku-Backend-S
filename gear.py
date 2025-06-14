@@ -4,7 +4,6 @@ from reportlab.platypus import Paragraph, Table as PlatypusTable, TableStyle
 from reportlab.lib.units import cm
 from reportlab.lib import colors
 from datetime import datetime
-from reportlab.lib.pagesizes import letter
 
 from reportlab.platypus import Image, Spacer
 from reportlab.pdfbase import pdfmetrics
@@ -201,19 +200,20 @@ class Table:
 class HeaderFooter:
     def __init__(self):
         # self.F4 = (21 * cm, 33 * cm)
-        self.letter = (21.59 * cm, 27.94 * cm)
+        # self.letter = (21.59 * cm, 27.94 * cm)
+        self.A4 = (21 * cm, 29.7 * cm)
         # self.letter_size = letter
     
     def header_footer(self, canvas, doc):
         canvas.saveState()
 
         margin_left = 2 * cm
-        margin_top = self.letter[1] - 2 * cm
+        margin_top = self.A4[1] - 2 * cm
 
         logo_path = "static/image/LimbunganLogo.jpg"
         canvas.drawImage(logo_path, margin_left, margin_top - 2.1 * cm, width=3.5 * cm, height=3.5 * cm)
 
-        page_width = self.letter[0]
+        page_width = self.A4[0]
         center_x = (page_width+(margin_left/2)) / 2  # Posisi tengah horizontal canvas
 
         header_text_1 = "PEMERINTAH KOTA PEKANBARU"
@@ -239,8 +239,8 @@ class HeaderFooter:
 
         canvas.setStrokeColor(colors.black)
         canvas.setLineWidth(1)
-        canvas.line(margin_left, margin_top - 2.2 * cm, self.letter[0] - margin_left, margin_top - 2.2 * cm)
-        canvas.line(margin_left, margin_top - 2.25 * cm, self.letter[0] - margin_left, margin_top - 2.25 * cm)
+        canvas.line(margin_left, margin_top - 2.2 * cm, self.A4[0] - margin_left, margin_top - 2.2 * cm)
+        canvas.line(margin_left, margin_top - 2.25 * cm, self.A4[0] - margin_left, margin_top - 2.25 * cm)
 
         canvas.restoreState()
 

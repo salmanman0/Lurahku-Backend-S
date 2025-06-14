@@ -27,13 +27,17 @@ import gear as gear
 app = Flask(__name__)
 CORS(app)
 
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
 UPLOAD_FOLDER_1 = 'static/prfl/'
 UPLOAD_FOLDER_2 = 'static/gnkk/'
 if not os.path.exists(UPLOAD_FOLDER_1):
     os.makedirs(UPLOAD_FOLDER_1)
 if not os.path.exists(UPLOAD_FOLDER_2):
     os.makedirs(UPLOAD_FOLDER_2)
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+
+app.config['MAIL_SERVER'] = 'smtp-relay.brevo.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
@@ -50,9 +54,6 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 FCM_SERVER_KEY = "YOUR_FCM_SERVER_KEY"
 FCM_URL = "https://fcm.googleapis.com/fcm/send"
 TOKENS_FILE = "tokens.json"
-
-dotenv_path = join(dirname(__file__), '.env')
-load_dotenv(dotenv_path)
 
 mail = Mail(app)
 jwt = JWTManager(app)
@@ -174,8 +175,8 @@ def forgot_password():
         })
         reset_link = url_for('reset_password', token=short_token, _external=True)
         msg = Message(
-            '🔒 Atur Ulang Kata Sandi - Lurahku',
-            sender='salman21ti@mahasiswa.pcr.ac.id',
+            '🔒 Atur Ulang Kata Sandi - SIPINA LIMBUNGAN',
+            sender='kelurahanlimbungan28@gmail.com',
             recipients=[email]
         )
         
@@ -257,13 +258,19 @@ def reset_password(token):
             current_user = decode_token(full_token)  
             user_id = current_user['sub']['noKK']  
             new_password = request.json.get('password')
-            latlong = request.json.get('latlong')
+            # latlong = request.json.get('latlong')
             if not new_password:
                 return jsonify({'message': 'Password tidak boleh kosong!'}), 400
 
             hashed_password = hashlib.sha256(new_password.encode('utf-8')).hexdigest()
             db.users.update_one({'noKK': user_id}, {'$set': {'password': hashed_password}})
-            db.tokens.update_one({'short_token': token}, {'$set': {'status': "Telah diubah", 'lokasi': latlong}})
+            db.tokens.update_one({
+                'short_token': token}, 
+                {'$set': {'status': 
+                            "Telah diubah",
+                            #'lokasi': latlong 
+                        }
+                })
 
             return jsonify({'message': 'Password berhasil direset!'}), 200
         except Exception as e:

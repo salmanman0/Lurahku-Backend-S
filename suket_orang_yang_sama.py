@@ -42,7 +42,7 @@ else:
   romawi = "Terjadi kesalahan"
 
 def create_pdf(file_path, no_surat, tanggal, romawi, tahun, pelapor, dataBenar, dataSalah, dokumenBenar, dokumenSalah, nomorDokumenBenar, nomorDokumenSalah, keterangan):
-    doc = BaseDocTemplate(file_path, pagesize=head.letter)
+    doc = BaseDocTemplate(file_path, pagesize=head.A4)
     frame = Frame(doc.leftMargin, doc.bottomMargin, width=doc.width, height=doc.height - 1.8 * cm, leftPadding=4, rightPadding=3, id='normal')
     template = PageTemplate(id='header_footer', frames=frame, onPage=head.header_footer)
     doc.addPageTemplates([template])
