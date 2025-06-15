@@ -24,6 +24,8 @@ import suket_domisili_usaha as sdu
 import suket_pindah_wilayah as spw
 import suket_tanggungan as stk
 import suket_orang_yang_sama as soys
+import suket_belum_menikah as sbm
+
 import gear as gear
 import smtplib
 from email.mime.text import MIMEText
@@ -1410,7 +1412,92 @@ def post_suket_pindah_wilayah():
             return jsonify(status='gagal', message="Permohonan Surat Pindah Wilayah gagal dikirimkan")
     else :
         return jsonify(status='gagal', message="Hanya dapat menggunakan NIK yang terdaftar di KK")
+    
+@app.route("/post_suket_belum_menikah", methods=['POST'])
+@jwt_required()
+def post_suket_belum_menikah():
+    current_user = get_jwt_identity()
+    uId = current_user['uId']
+    uId = int(uId)
+    nikP = request.form.get('nikP')
+    pelapor = db.warga.find_one({"nik": nikP}, {"_id": 0})
+    if uId == pelapor['uId'] :
+        # kewarganegaraanP = request.form.get('kewarganegaraanP')
+        # kewarganegaraanP = kewarganegaraanP.title()
+        keteranganP = request.form.get('keteranganP')
+        userPelapor = db.users.find_one({"uId": pelapor['uId']}, {"_id": 0})
 
+        namaPelapor = pelapor['nama']
+        nikPelapor = pelapor['nik']
+        tempat_lahir_pelapor = pelapor['tempat_lahir'].split(',')[0]
+        ttlPelapor = f"{tempat_lahir_pelapor}, {pelapor['ttl']}"
+        jenisKelaminP = pelapor['jenis_kelamin']
+        agamaP = pelapor['agama']
+        pekerjaanP = pelapor['pekerjaan']
+        alamatPelapor = userPelapor['alamat']
+        wargaIdP = pelapor['wargaId']
+        rtP = userPelapor['rt']
+        rwP = userPelapor['rw']
+        noHp = userPelapor['noHp']
+
+        last_surat = db.surat.find_one(sort=[("suratId", -1)])
+        if last_surat: suratId = last_surat['suratId'] + 1
+        else: suratId = 1  
+        last_riwayat = db.riwayat.find_one(sort=[("riwayatId", -1)])
+        if last_riwayat: riwayatId = last_riwayat['riwayatId'] + 1
+        else: riwayatId = 1  
+
+        jam, menit, detik = gear.get_waktu()
+        hari, bulan, tahun = gear.get_tanggal()
+        kabisat = gear.get_kabisat(bulan)
+
+        data_pelapor = {
+            "Nama": namaPelapor,
+            "NIK": nikPelapor,
+            "Tempat, Tanggal Lahir": ttlPelapor,
+            "Jenis Kelamin" : jenisKelaminP,
+            # "Kewarganegaraan" : kewarganegaraanP,
+            "Agama" : agamaP,
+            "Pekerjaan" : pekerjaanP,
+            "Alamat": f"{alamatPelapor} RT.{rtP} RW.{rwP}",
+        }
+        # ======================================================
+        isi_surat = {
+            "data_pelapor" : data_pelapor,
+        }
+        # ======================================================
+        data_surat = {
+            "nama_pelapor": namaPelapor,
+            "jenis_surat": "Surat Keterangan Belum Menikah",
+            "tanggal_pengajuan": f"{hari} {kabisat} {tahun}",
+            "keterangan_surat": keteranganP,
+            "no_hp": noHp,
+            "status_surat": "Menunggu Persetujuan RT",
+            "isi_surat" : isi_surat,
+            "kode_surat" : 0,
+            "rt" : rtP,
+            "rw" : rwP,
+            "wargaId" : wargaIdP,
+            "suratId": suratId,
+        }
+        data_riwayat = {
+            "riwayatId" : riwayatId,
+            "suratId" : suratId,
+            "uId" : uId,
+            "catatan" : "",
+            "status_surat" : "Menunggu Persetujuan RT",
+            "waktu" : f"{jam}:{menit}:{detik} • {hari} {kabisat} {tahun}"
+        }
+        try:
+            # sk.create_pdf(f"static/file/suket-kematian-{kode_surat}.pdf", kode_surat, f"{gear.hari} {gear.kabisat} {gear.tahun}", gear.romawi, gear.tahun, data_terlapor, data_hari_meninggal, data_pelapor)
+            db.surat.insert_one(data_surat)
+            db.riwayat.insert_one(data_riwayat)
+            return jsonify(status='sukses', message="Permohonan Surat Keterangan Belum Menikah telah dikirimkan")
+        except Exception as e:
+            print("Gagal:", str(e))
+            return jsonify(status='gagal', message="Permohonan Surat Keterangan Belum Menikah gagal dikirimkan")
+    else :
+        return jsonify(status='gagal', message="Hanya dapat menggunakan NIK yang terdaftar pada KK")
 #POST
 
 #UPDATE
@@ -1970,7 +2057,21 @@ def update_surat_accept():
                 romawi = gear.get_romawi(bulan)
                 print(jenSur)
                 soys.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", romawi, tahun, isiSur['data_pelapor'], isiSur['dataBenar'], isiSur['dataSalah'], isiSur['dokumenBenar'], isiSur['dokumenSalah'], isiSur['nomorDokumenBenar'], isiSur['nomorDokumenSalah'], sur['keterangan_surat'])
+            
+            elif jenSur == "Surat Keterangan Belum Menikah" :
                 
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Belum Menikah", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                sbm.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", sur['rt'], sur['rw'], romawi, tahun, isiSur['data_pelapor'], sur['keterangan_surat'])
+            
             elif jenSur == "Surat Keterangan Tanggungan Keluarga" :
                 
                 kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Tanggungan Keluarga", "status_surat": "Surat Disetujui"})
