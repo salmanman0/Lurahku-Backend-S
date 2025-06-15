@@ -65,4 +65,4 @@ def create_pdf(file_path,no_surat, tanggal, romawi, tahun, jenisUsaha, data, ala
 # }
 # nomor_surat = 650
 
-# create_pdf("static/file/suket_domisili_usaha.pdf",nomor_surat, "10 Oktober 2024", romawi, tahun, "UMKM", data_pengajuan, alamat_pengajuan, peraturan, "mama tu amam")
+# create_pdf("static/file/suket_domisili_usaha.pdf",nomor_surat, "10 Oktober 2024", "I", "2024", "UMKM", data_pengajuan, alamat_pengajuan, peraturan, "mama tu amam")
