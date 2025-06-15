@@ -19,10 +19,15 @@ import suket_kematian as sk
 import suket_penghasilan as sp
 import suket_tidak_mampu as stm
 import suket_domisili as sd
+import suket_domisili_perusahaan as sdp
+import suket_domisili_usaha as sdu
 import suket_pindah_wilayah as spw
 import suket_tanggungan as stk
 import suket_orang_yang_sama as soys
 import gear as gear
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
 CORS(app)
@@ -1809,7 +1814,135 @@ def update_surat_accept():
                 romawi = gear.get_romawi(bulan)
                 print(jenSur)
                 sd.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", sur['rt'], sur['rw'], isiSur['data_pelapor']['Alamat'], romawi, tahun, isiSur['data_pelapor'], sur['keterangan_surat'])
-                
+            
+            elif jenSur == "Surat Keterangan Domisili Usaha":
+                kode_surat = db.surat.count_documents({
+                    "jenis_surat": "Surat Keterangan Domisili Usaha",
+                    "status_surat": "Surat Disetujui"
+                })
+
+                if kode_surat:
+                    kode_surat += 1
+                else:
+                    kode_surat = 1
+
+                # Ambil tanggal dan ubah format
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat = gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+
+                # Data dari dokumen
+                isiSur = sur["isi_surat"]
+                data_pelapor = isiSur["data_pelapor"]
+                alamat_pengajuan = isiSur["alamat_pengajuan"]
+
+                # Data perusahaan
+                data_perusahaan = {
+                    "Nama Perusahaan": f"<b>{isiSur.get('jenisUsaha', 'Usaha Tanpa Nama')}</b>",
+                    "Nama": f"<b>{data_pelapor['Nama']}</b>",
+                    "Jabatan": "<b>Pemilik Usaha</b>",  # Jika jabatan tidak tersedia
+                    "NIK": f"<b>{data_pelapor['NIK']}</b>",
+                }
+
+                # Data domisili
+                domisili_perusahaan = {
+                    "Jalan": alamat_pengajuan["Alamat"],
+                    "Kelurahan": alamat_pengajuan["Kelurahan"],
+                    "Kecamatan": alamat_pengajuan["Kecamatan"],
+                    "Kota": alamat_pengajuan["Kota"],
+                }
+
+                # Placeholder notaris
+                namaNotaris = "Nama Notaris"  # <-- jika ingin tetap opsional
+                noAkta = "123/XX/NTR"
+                tanggalAkta = "1 Januari 2020"
+
+                rt = sur["rt"]
+                rw = sur["rw"]
+                keterangan = sur["keterangan_surat"]
+
+                # Lokasi file
+                nama_file_pdf = f"static/file/Surat_Keterangan_Domisili_Usaha-{kode_surat}.pdf"
+
+                # Panggil fungsi PDF
+                sdu.create_pdf(
+                    nama_file_pdf,
+                    kode_surat,
+                    f"{hari} {kabisat} {tahun}",
+                    romawi,
+                    tahun,
+                    namaNotaris,
+                    noAkta,
+                    tanggalAkta,
+                    rt,
+                    rw,
+                    data_perusahaan,
+                    domisili_perusahaan,
+                    keterangan
+                )
+            elif jenSur == "Surat Keterangan Domisili Perusahaan":
+                # Hitung kode surat
+                kode_surat = db.surat.count_documents({
+                    "jenis_surat": "Surat Keterangan Domisili Perusahaan",
+                    "status_surat": "Surat Disetujui"
+                })
+
+                if kode_surat:
+                    kode_surat += 1
+                else:
+                    kode_surat = 1
+
+                # Ambil data dari database
+                isiSur = sur["isi_surat"]
+                data_perusahaan_raw = isiSur["data_perusahaan"]
+                domisili_raw = isiSur["domisili_perusahaan"]
+                namaNotaris = isiSur["namaNotaris"]
+                noAkta = isiSur["noAkta"]
+                tanggalAkta = isiSur["tanggalAkta"]
+                rt = sur["rt"]
+                rw = sur["rw"]
+                keterangan = sur["keterangan_surat"]
+
+                # Format tanggal
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat = gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+
+                # Format data perusahaan
+                data_perusahaan = {
+                    "Nama Perusahaan": f"<b>{data_perusahaan_raw['Nama Perusahaan']}</b>",
+                    "Nama": f"<b>{data_perusahaan_raw['Nama']}</b>",
+                    "Jabatan": f"<b>{data_perusahaan_raw['Jabatan']}</b>",
+                    "NIK": f"<b>{data_perusahaan_raw['NIK']}</b>",
+                }
+
+                # Format domisili
+                domisili_perusahaan = {
+                    "Jalan": domisili_raw["Jalan"],
+                    "Kelurahan": domisili_raw["Kelurahan"],
+                    "Kecamatan": domisili_raw["Kecamatan"],
+                    "Kota": domisili_raw["Kota"],
+                }
+
+                # Buat nama file
+                nama_file_pdf = f"static/file/Surat_Keterangan_Domisili_Perusahaan-{kode_surat}.pdf"
+
+                # Panggil fungsi untuk membuat PDF
+                sdp.create_pdf(
+                    nama_file_pdf,
+                    kode_surat,
+                    f"{hari} {kabisat} {tahun}",
+                    romawi,
+                    tahun,
+                    namaNotaris,
+                    noAkta,
+                    tanggalAkta,
+                    rt,
+                    rw,
+                    data_perusahaan,
+                    domisili_perusahaan,
+                    keterangan
+                )
             elif jenSur == "Surat Keterangan Pindah Wilayah" :
                 
                 kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Pindah Wilayah", "status_surat": "Surat Disetujui"})

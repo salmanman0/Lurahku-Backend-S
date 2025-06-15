@@ -36,20 +36,20 @@ def create_pdf(file_path, no_surat, tanggal, romawi, tahun, namaNotaris, noAkta,
 
     doc.build(elements)
 
-data_perusahaan = {
-    "Nama Perusahaan": "<b>CV. TOSINDO CONSULTANT</b>",
-    "Nama": "<b>AFIF WIBISONO</b>",
-    "Jabatan": "<b>Direktur Utama</b>",
-    "NIK": "<b>1407120409930004</b>",
-}
+# data_perusahaan = {
+#     "Nama Perusahaan": "<b>CV. TOSINDO CONSULTANT</b>",
+#     "Nama": "<b>AFIF WIBISONO</b>",
+#     "Jabatan": "<b>Direktur Utama</b>",
+#     "NIK": "<b>1407120409930004</b>",
+# }
 
-domisili_perusahaan = {
-    "Jalan": "Jl. Cemara Regency Park No.04 RT.02 RW.10",
-    "Kelurahan": "Limbungan",
-    "Kecamatan": "Rumbai Timur",
-    "Kota": "Pekanbaru",
-}
+# domisili_perusahaan = {
+#     "Jalan": "Jl. Cemara Regency Park No.04 RT.02 RW.10",
+#     "Kelurahan": "Limbungan",
+#     "Kecamatan": "Rumbai Timur",
+#     "Kota": "Pekanbaru",
+# }
 
-nomor_surat = 650
+# nomor_surat = 650
 
 # create_pdf("static/file/suket_domisili_perusahaan.pdf",nomor_surat, "12 Oktober 2024", "X", "2004", "ILHAM JR", "12", "12 Oktober 2007", "02", "10", data_perusahaan, domisili_perusahaan, "mamam tu mamam")
