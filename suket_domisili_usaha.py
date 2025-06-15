@@ -1,5 +1,5 @@
 from reportlab.lib.units import cm
-from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame, Paragraph, Table, TableStyle
+from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame, Paragraph, Table, TableStyle, ListFlowable, ListItem
 from reportlab.lib import colors
 from datetime import datetime
 from gear import Align, Table, HeaderFooter, TandaTangan
@@ -9,37 +9,58 @@ table = Table()
 head = HeaderFooter()
 ttd = TandaTangan()
 
-def create_pdf(file_path,no_surat, tanggal, romawi, tahun, jenisUsaha, data, alamat, peraturan, keterangan):
+def create_pdf(file_path, no_surat, tanggal, romawi, tahun, jenisUsaha, data, alamat, peraturan, keterangan):
     doc = BaseDocTemplate(file_path, pagesize=head.A4)
-    frame = Frame(doc.leftMargin, doc.bottomMargin, width=doc.width, height=doc.height - 1.8 * cm, leftPadding=4, rightPadding=3, id='normal')
+    frame = Frame(
+        doc.leftMargin, doc.bottomMargin,
+        width=doc.width, height=doc.height - 1.8 * cm,
+        leftPadding=4, rightPadding=3,
+        id='normal'
+    )
     template = PageTemplate(id='header_footer', frames=frame, onPage=head.header_footer)
     doc.addPageTemplates([template])
     elements = []
 
     elements.append(Paragraph("<b><u>SURAT KETERANGAN DOMISILI USAHA</u></b>", align.center(12, 2)))
-    elements.append(Paragraph(f"<b>No : {no_surat}/SKDU/LB/{romawi}/{tahun}</b>", align.center(12,0.5*cm)))
+    elements.append(Paragraph(f"<b>No : {no_surat}/SKDU/LB/{romawi}/{tahun}</b>", align.center(12, 0.5 * cm)))
 
     text1 = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lurah Limbungan Kecamatan Rumbai Timur Kota Pekanbaru, dengan ini menerangkan bahwa : "
-    elements.append(Paragraph(text1, align.justify_with_leading(12,0,1.5)))
+    elements.append(Paragraph(text1, align.justify_with_leading(12, 0, 1.5)))
 
-    table.table_normal_dalam(elements, data, align.left(12, 2), 0.2*cm)
+    table.table_normal_dalam(elements, data, align.left(12, 2), 0.2 * cm)
 
     text3 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Benar yang bersangkutan memiliki usaha <b>“{jenisUsaha}”</b> yang berdomisili di : "
-    elements.append(Paragraph(text3, align.justify_with_leading(12,0,1.5)))
+    elements.append(Paragraph(text3, align.justify_with_leading(12, 0, 1.5)))
 
-    table.table_normal_dalam(elements, alamat, align.left(12, 1), 0.2*cm)    
+    table.table_normal_dalam(elements, alamat, align.left(12, 1), 0.2 * cm)
 
-    text4 = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dengan persyaratan dan ketentuan-ketentuan sebagai berikut: "
-    elements.append(Paragraph(text4, align.justify_with_leading(12, 0, 1.5)))
+    text4 = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dengan persyaratan dan ketentuan-ketentuan sebagai berikut:"
+    elements.append(Paragraph(text4, align.justify_with_leading(12, 0.2 * cm, 1.5)))
 
-    table.table_normal_dalam_numbering(elements, peraturan, align.justify_with_leading(12, 0, 1.5), 0.2*cm) 
+    # Buat ListFlowable dari peraturan
+    list_items = []
+    for i, value in enumerate(peraturan.values(), start=1):
+        p = Paragraph(f"{value}", align.justify_with_leading(12,0,1.5))
+        list_items.append(ListItem(p, leftIndent=18))
+
+    elements.append(ListFlowable(
+        list_items,
+        bulletType='1',          
+        bulletFormat='%s.',      
+        start='1',
+        leftIndent=12,
+        bulletFontSize=12,
+        bulletFontName='Arial',
+        spaceBefore=0.2 * cm
+    ))
 
     text5 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Demikian surat keterangan ini kami berikan kepada yang bersangkutan untuk <b>{keterangan}</b>.<br/>"
-    elements.append(Paragraph(text5, align.justify_with_leading(12, 0.5*cm, 1.5)))
-    
-    ttd.tanda_tangan(elements, tanggal, align.right_with_leading(12,0,1.5))
+    elements.append(Paragraph(text5, align.justify_with_leading(12, 0.5 * cm, 1.5)))
+
+    ttd.tanda_tangan(elements, tanggal, align.right_with_leading(12, 0, 1.5))
 
     doc.build(elements)
+
 
 
 # data_pengajuan = {

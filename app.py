@@ -1956,19 +1956,12 @@ def update_surat_accept():
                 )
 
             elif jenSur == "Surat Keterangan Domisili Perusahaan":
-                # Hitung kode surat
-                kode_surat = db.surat.count_documents({
-                    "jenis_surat": "Surat Keterangan Domisili Perusahaan",
-                    "status_surat": "Surat Disetujui"
-                })
-
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Domisili Perusahaan", "status_surat": "Surat Disetujui"})
                 if kode_surat:
                     kode_surat += 1
                 else:
                     kode_surat = 1
 
-                # Ambil data dari database
-                isiSur = sur["isi_surat"]
                 data_perusahaan_raw = isiSur["data_perusahaan"]
                 domisili_raw = isiSur["domisili_perusahaan"]
                 namaNotaris = isiSur["namaNotaris"]
@@ -2000,7 +1993,7 @@ def update_surat_accept():
                 }
 
                 # Buat nama file
-                nama_file_pdf = f"static/file/Surat_Keterangan_Domisili_Perusahaan-{kode_surat}.pdf"
+                nama_file_pdf = f"static/file/{jenSur} {kode_surat}.pdf"
 
                 # Panggil fungsi untuk membuat PDF
                 sdp.create_pdf(
