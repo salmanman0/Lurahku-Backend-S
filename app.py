@@ -1993,7 +1993,7 @@ def update_surat_accept():
                 }
 
                 # Buat nama file
-                nama_file_pdf = f"static/file/{jenSur} {kode_surat}.pdf"
+                nama_file_pdf = f"static/file/{jenSur}-{kode_surat}.pdf"
 
                 # Panggil fungsi untuk membuat PDF
                 sdp.create_pdf(
