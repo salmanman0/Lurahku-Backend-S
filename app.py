@@ -1903,6 +1903,7 @@ def update_surat_accept():
                 sd.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", sur['rt'], sur['rw'], isiSur['data_pelapor']['Alamat'], romawi, tahun, isiSur['data_pelapor'], sur['keterangan_surat'])
             
             elif jenSur == "Surat Keterangan Domisili Usaha":
+                # Hitung jumlah surat untuk mendapatkan nomor
                 kode_surat = db.surat.count_documents({
                     "jenis_surat": "Surat Keterangan Domisili Usaha",
                     "status_surat": "Surat Disetujui"
@@ -1913,60 +1914,54 @@ def update_surat_accept():
                 else:
                     kode_surat = 1
 
-                # Ambil tanggal dan ubah format
+                # Ambil data dari database
+                isiSur = sur["isi_surat"]
+                data_pelapor_raw = isiSur["data_pelapor"]
+                alamat_raw = isiSur["alamat_pengajuan"]
+                peraturan = isiSur["peraturan"]
+                jenisUsaha = isiSur["jenisUsaha"]
+                keterangan = sur["keterangan_surat"]
+
+                # Format tanggal
                 hari, bulan, tahun = gear.get_tanggal()
                 kabisat = gear.get_kabisat(bulan)
                 romawi = gear.get_romawi(bulan)
 
-                # Data dari dokumen
-                isiSur = sur["isi_surat"]
-                data_pelapor = isiSur["data_pelapor"]
-                alamat_pengajuan = isiSur["alamat_pengajuan"]
-
-                # Data perusahaan
-                data_perusahaan = {
-                    "Nama Perusahaan": f"<b>{isiSur.get('jenisUsaha', 'Usaha Tanpa Nama')}</b>",
-                    "Nama": f"<b>{data_pelapor['Nama']}</b>",
-                    "Jabatan": "<b>Pemilik Usaha</b>",  # Jika jabatan tidak tersedia
-                    "NIK": f"<b>{data_pelapor['NIK']}</b>",
+                # Format data pelapor
+                data_pelapor = {
+                    "Nama": f"<b>{data_pelapor_raw['Nama']}</b>",
+                    "NIK": data_pelapor_raw["NIK"],
+                    "Tempat, Tanggal Lahir": data_pelapor_raw["Tempat, Tanggal Lahir"],
+                    "Agama": data_pelapor_raw["Agama"],
+                    "Pekerjaan": data_pelapor_raw["Pekerjaan"],
+                    "Alamat": data_pelapor_raw["Alamat"],
                 }
 
-                # Data domisili
-                domisili_perusahaan = {
-                    "Jalan": alamat_pengajuan["Alamat"],
-                    "Kelurahan": alamat_pengajuan["Kelurahan"],
-                    "Kecamatan": alamat_pengajuan["Kecamatan"],
-                    "Kota": alamat_pengajuan["Kota"],
+                # Format alamat usaha
+                alamat_pengajuan = {
+                    "Alamat": alamat_raw["Alamat"],
+                    "Kelurahan": alamat_raw["Kelurahan"],
+                    "Kecamatan": alamat_raw["Kecamatan"],
+                    "Kota": alamat_raw["Kota"],
                 }
 
-                # Placeholder notaris
-                namaNotaris = "Nama Notaris"  # <-- jika ingin tetap opsional
-                noAkta = "123/XX/NTR"
-                tanggalAkta = "1 Januari 2020"
-
-                rt = sur["rt"]
-                rw = sur["rw"]
-                keterangan = sur["keterangan_surat"]
-
-                # Lokasi file
+                # Buat nama file PDF
                 nama_file_pdf = f"static/file/Surat_Keterangan_Domisili_Usaha-{kode_surat}.pdf"
 
-                # Panggil fungsi PDF
+                # Panggil fungsi untuk membuat PDF
                 sdu.create_pdf(
                     nama_file_pdf,
                     kode_surat,
                     f"{hari} {kabisat} {tahun}",
                     romawi,
                     tahun,
-                    namaNotaris,
-                    noAkta,
-                    tanggalAkta,
-                    rt,
-                    rw,
-                    data_perusahaan,
-                    domisili_perusahaan,
+                    jenisUsaha,
+                    data_pelapor,
+                    alamat_pengajuan,
+                    peraturan,
                     keterangan
                 )
+
             elif jenSur == "Surat Keterangan Domisili Perusahaan":
                 # Hitung kode surat
                 kode_surat = db.surat.count_documents({
