@@ -318,7 +318,7 @@ def revoked_token_callback(jwt_header, jwt_payload):
 
 #POST
 @app.route("/post_users", methods=['POST'])
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def post_users():
     last_user = db.users.find_one(sort=[("uId", -1)])
     last_permit = db.permitted.find_one(sort=[("uId", -1)])
@@ -1503,7 +1503,7 @@ def post_suket_belum_menikah():
 #UPDATE
 @app.route("/update_user", methods=['POST'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def update_user():
     current_user = get_jwt_identity()
     uId = current_user['uId']
@@ -1542,7 +1542,7 @@ def update_user():
 
 @app.route("/update_user_admin", methods=['POST'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def update_data_user():
     target_uId = request.form.get('uId')
     if not target_uId:
@@ -1620,7 +1620,7 @@ def update_data_user():
 
 @app.route("/del_surat/<int:suratId>", methods=['POST'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def del_surat(suratId):
     suratId = int(suratId)
     try :
@@ -1631,7 +1631,7 @@ def del_surat(suratId):
 
 @app.route('/update_permission', methods=['POST'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def update_permission():
     current_user = get_jwt_identity()
     uId = current_user['uId']
@@ -1646,7 +1646,7 @@ def update_permission():
 
 @app.route('/update_user_kk', methods=['POST'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def update_user_kk():
     current_user = get_jwt_identity()
     uId = current_user['uId']
@@ -1758,7 +1758,7 @@ def update_password():
 
 @app.route("/update_jabatan", methods=['POST'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def update_jabatan():
     # Ambil jabatan dari form
     jabatan = request.form.get('jabatan')
@@ -2149,14 +2149,14 @@ def update_surat_reject():
 #GET
 @app.route("/get_users", methods=['GET'])
 # @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def get_users():
     data = list(db.users.find({}, {"_id": 0}))
     return jsonify(status= 'sukses', users = data)
 
 @app.route("/get_permission", methods=['GET'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def get_permission():
     current_user = get_jwt_identity()
     uId = current_user['uId']
@@ -2166,7 +2166,7 @@ def get_permission():
 
 @app.route("/get_user_personal", methods=['GET'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def get_users_personal():
     current_user = get_jwt_identity()
     uId = current_user['uId']
@@ -2176,21 +2176,21 @@ def get_users_personal():
 
 @app.route("/get_wilayah", methods=['GET'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def get_wilayah():
     data = list(db.wilayah.find({}, {"_id": 0}))
     return jsonify(status= 'sukses', wilayah = data)
 
 @app.route("/get_warga", methods=['GET'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def get_warga():
     data = list(db.warga.find({}, {"_id": 0}))
     return jsonify(status= 'sukses', warga = data)
 
 @app.route("/get_keluarga", methods=['GET'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def get_keluarga():
     current_user = get_jwt_identity()
     uId = current_user['uId']
@@ -2199,7 +2199,7 @@ def get_keluarga():
 
 @app.route("/get_rekom", methods=['GET'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def get_rekom():
     current_user = get_jwt_identity()
     uId = current_user['uId']
@@ -2235,7 +2235,7 @@ def get_rekom():
 
 @app.route("/get_rekom_personal", methods=['GET'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def get_rekom_personal():
     current_user = get_jwt_identity()
     uId = current_user['uId']
@@ -2247,7 +2247,7 @@ def get_rekom_personal():
 
 @app.route("/get_rt_rw", methods=['GET'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def get_rt_rw():
     ketua = list(db.warga.find({"jabatan" : {"$in": ["Ketua RT", "Ketua RW"]} }, {"_id" : 0}))
     data = []
@@ -2266,14 +2266,14 @@ def get_rt_rw():
 
 @app.route("/get_surat", methods=['GET'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def get_surat():
     data = list(db.surat.find({}, {"_id": 0}))
     return jsonify(status= 'sukses', surat = data)
 
 @app.route("/get_riwayat", methods=['GET'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def get_riwayat():
     current_user = get_jwt_identity()
     uId = current_user['uId']
@@ -2301,7 +2301,7 @@ def get_riwayat():
 
 @app.route("/get_all_riwayat", methods=['GET'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def get_all_riwayat():
     data = list(db.riwayat.find({}, {"_id": 0}))
     detail_surat = []
@@ -2327,7 +2327,7 @@ def get_all_riwayat():
 #DELETE
 @app.route("/del_users/<noKK>", methods=['POST'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def del_users(noKK):
     try:
         db.users.delete_one({"noKK": noKK})
@@ -2338,7 +2338,7 @@ def del_users(noKK):
 
 @app.route("/del_keluarga/<int:wargaId>", methods=['POST'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def del_keluarga(wargaId):
     wargaId = int(wargaId)
     try :
@@ -2349,7 +2349,7 @@ def del_keluarga(wargaId):
 
 @app.route("/del_rekom", methods=['POST'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def del_rekom():
     rekomId = request.form.get('rekomId')
     rekomId = int(rekomId)
@@ -2373,7 +2373,7 @@ def get_pdf(jenis_surat, kode_surat):
     
 @app.route("/update_status_surat", methods=['POST'])
 @jwt_required()
-@limiter.limit("20 per minute")
+@limiter.limit("120 per minute")
 def update_status_surat():
     # Ambil jabatan dari form
     statusSurat = request.form.get('status_surat')
