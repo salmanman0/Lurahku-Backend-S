@@ -9,14 +9,14 @@ head = HeaderFooter()
 ttd = TandaTangan()
 
 def create_pdf(file_path, no_surat, tanggal, romawi, tahun, terlapor, pelapor, hubungan, rt,rw, bulan_gaib, tahun_gaib, keterangan):
-    doc = BaseDocTemplate(file_path, pagesize=head.A4)
+    doc = BaseDocTemplate(file_path, pagesize=head.A4 )
     frame = Frame(doc.leftMargin, doc.bottomMargin, width=doc.width, height=doc.height - 1.8 * cm, leftPadding=4, rightPadding=3, id='normal')
     template = PageTemplate(id='header_footer', frames=frame, onPage=head.header_footer)
     doc.addPageTemplates([template])
     elements = []
 
     elements.append(Paragraph("<b><u>SURAT KETERANGAN GAIB</u></b>", align.center_with_leading(12,0,1.5)))
-    elements.append(Paragraph(f"Nomor: {no_surat}/SKum/LB/{romawi}/{tahun}", align.center_with_leading(12,0,2)))
+    elements.append(Paragraph(f"Nomor:   /SKum/LB/{romawi}/{tahun}", align.center_with_leading(12,0,2)))
 
     text1 = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>LURAH LIMBUNGAN KECAMATAN RUMBAI TIMUR KOTA PEKANBARU</b>, dengan ini menerangkan bahwa : "
     elements.append(Paragraph(text1, align.justify_with_leading(12,.0,1.5)))
@@ -28,7 +28,7 @@ def create_pdf(file_path, no_surat, tanggal, romawi, tahun, terlapor, pelapor, h
 
     table.table_normal_dalam(elements, pelapor, align.justify_with_leading(12,0,1), 0.2*cm)    
     
-    text3 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Berdasarkan Surat Pernyataan dari <b>{pelapor['Nama']}</b> dan Surat Keterangan dari Ketua RT.{rt} RW.{rw}, benar {hubungan} {pelapor['Nama']} tersebut diatas sudah tidak berada lagi di Kelurahan Limbungan sejak bulan {bulan_gaib} tahun {tahun_gaib}, dan kami tidak mengetahui lagi alamatnya (Gaib)."
+    text3 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Berdasarkan Surat Pernyataan dari <b>{pelapor['Nama']}</b> dan Surat Keterangan dari Ketua RT. {rt} RW. {rw}, benar {hubungan} {pelapor['Nama']} tersebut diatas sudah tidak berada lagi di Kelurahan Limbungan sejak bulan {bulan_gaib} tahun {tahun_gaib}, dan kami tidak mengetahui lagi alamatnya (Gaib)."
     elements.append(Paragraph(text3, align.justify_with_leading(12,0,1.5)))
 
 

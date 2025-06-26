@@ -17,14 +17,14 @@ def create_pdf(file_path, no_surat, tanggal, romawi, tahun, namaNotaris, noAkta,
     elements = []
 
     elements.append(Paragraph("<b><u>SURAT KETERANGAN DOMISILI PERUSAHAAN</u></b>", align.center(12, 2)))
-    elements.append(Paragraph(f"<b>No : {no_surat}/SKU/LB/{romawi}/{tahun}</b>", align.center(12,0.5*cm)))
+    elements.append(Paragraph(f"<b>No :   /SKU/LB/{romawi}/{tahun}</b>", align.center(12,0.5*cm)))
 
     text1 = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lurah Limbungan Kecamatan Rumbai Timur Kota Pekanbaru, dengan ini menerangkan bahwa : "
     elements.append(Paragraph(text1, align.justify_with_leading(12,0,1.5)))
 
     table.table_normal_dalam(elements, perusahaan, align.left(12, 2), 0.2*cm)
 
-    text3 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Berdasarkan Salinan Notaris <b>{namaNotaris}</b> Nomor: {noAkta} tanggal {tanggalAkta} dan Keterangan Perizinan dari RT.{rt} RW.{rw}, benar <b>{perusahaan['Nama Perusahaan']}</b> tersebut diatas berdomisili di : "
+    text3 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Berdasarkan Salinan Notaris <b>{namaNotaris}</b> Nomor: {noAkta} tanggal {tanggalAkta} dan Keterangan Perizinan dari RT. {rt} RW. {rw}, benar <b>{perusahaan['Nama Perusahaan']}</b> tersebut diatas berdomisili di : "
     elements.append(Paragraph(text3, align.justify_with_leading(12,0,1.5)))
 
     table.table_normal_dalam(elements, domisili, align.left(12, 1), 0.2*cm)    

@@ -17,14 +17,14 @@ def create_pdf(file_path, no_surat, tanggal, rt, rw, alamat, romawi, tahun, pela
     elements = []
 
     elements.append(Paragraph("<b><u>SURAT KETERANGAN DOMISILI</u></b>", align.center(12, 2)))
-    elements.append(Paragraph(f"Nomor: {no_surat}-SKDM/LB/{romawi}/{tahun}", align.center(12,0.5*cm)))
+    elements.append(Paragraph(f"Nomor:   /SKDM/LB/{romawi}/{tahun}", align.center(12,0.5*cm)))
 
     text1 = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lurah Limbungan Kecamatan Rumbai Timur Kota Pekanbaru, dengan ini menerangkan bahwa : "
     elements.append(Paragraph(text1, align.justify_with_leading(12,0,1.5)))
 
     table.table_normal_dalam(elements, pelapor, align.left(12, 2), 0.2*cm)
 
-    text3 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Berdasarkan Keterangan Perizinan RT.{rt} RW.{rw} benar nama tersebut diatas adalah warga yang berdomisili di {alamat} RT.{rt} RW.{rw} Kelurahan Limbungan Kec Rumbai Timur."
+    text3 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Berdasarkan Keterangan Perizinan RT. {rt} RW. {rw} benar nama tersebut diatas adalah warga yang berdomisili di {alamat} RT. {rt} RW. {rw} Kelurahan Limbungan Kec Rumbai Timur."
     elements.append(Paragraph(text3, align.justify_with_leading(12,2,1.5)))
 
     text4 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Demikian Surat Keterangan ini dibuat dan <b>dipergunakan untuk {keterangan}</b>"

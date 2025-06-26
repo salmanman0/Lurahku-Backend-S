@@ -64,14 +64,14 @@ def create_pdf(file_path,no_surat, tanggal, romawi, tahun, alamat, rw, rt, data,
     elements = []
 
     elements.append(Paragraph("<b><u>SURAT KETERANGAN PINDAH WILAYAH</u></b>", align.center(12, 2)))
-    elements.append(Paragraph(f"<b>No : {no_surat}-SKUm/LB/{romawi}/{tahun}</b>", align.center(12,0.5*cm)))
+    elements.append(Paragraph(f"<b>No :   /SKUm/LB/{romawi}/{tahun}</b>", align.center(12,0.5*cm)))
 
     text1 = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lurah Limbungan menerangkan bahwa : "
     elements.append(Paragraph(text1, align.justify_with_leading(12,0,1.5)))
 
     table.table_normal_dalam(elements, data, align.left(12, 2), 0.2*cm)
 
-    text3 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Benar yang bersangkutan memiliki sebidang tanah di {alamat} RT.{rt} RW.{rw} Kelurahan Limbungan Kecamatan Rumbai Timur Kota Pekanbaru, dimana dahulunya termasuk wilayah administrasi Kelurahan Limbungan Kecamatan Rumbai Pesisir berdasarkan Surat Pernyataan Kepemilikan/ Penguasaan Tanah Register Lurah Limbungan Nomor : {nomorSPKTP} tanggal {tglSPKTP} dan sesuai <b>Nomor 03 dan Nomor 04 tanggal 17 Juni 2003</b> tentang pemekaran wilayah dan <b>Perda Nomor 10 tahun 2019</b> tentang Pembentukan Kecamatan. "
+    text3 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Benar yang bersangkutan memiliki sebidang tanah di {alamat} RT. {rt} RW. {rw} Kelurahan Limbungan Kecamatan Rumbai Timur Kota Pekanbaru, dimana dahulunya termasuk wilayah administrasi Kelurahan Limbungan Kecamatan Rumbai Pesisir berdasarkan Surat Pernyataan Kepemilikan/ Penguasaan Tanah Register Lurah Limbungan Nomor : {nomorSPKTP} tanggal {tglSPKTP} dan sesuai <b>Nomor 03 dan Nomor 04 tanggal 17 Juni 2003</b> tentang pemekaran wilayah dan <b>Perda Nomor 10 tahun 2019</b> tentang Pembentukan Kecamatan. "
     elements.append(Paragraph(text3, align.justify_with_leading(12,0,1.5)))
 
     # table.table_dalam(elements, domisili, align.left(12, 1))    

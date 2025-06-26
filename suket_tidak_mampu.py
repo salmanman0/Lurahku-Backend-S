@@ -17,14 +17,14 @@ def create_pdf(file_path,no_surat, tanggal, romawi, tahun, pelapor, alamat , rt,
     elements = []
 
     elements.append(Paragraph("<b><u>SURAT KETERANGAN TIDAK MAMPU</u></b>", align.center(12, 2)))
-    elements.append(Paragraph(f"<b>No : {no_surat}/SKTM/LB/{romawi}/{tahun}</b>", align.center(12,0.5*cm)))
+    elements.append(Paragraph(f"<b>No :   /SKTM/LB/{romawi}/{tahun}</b>", align.center(12,0.5*cm)))
 
     text1 = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lurah Limbungan Kecamatan Rumbai Timur Kota Pekanbaru, dengan ini menerangkan bahwa : "
     elements.append(Paragraph(text1, align.justify_with_leading(12,0,1.5)))
 
     table.table_normal_dalam(elements, pelapor, align.left(12, 2), 0.2*cm)
 
-    text3 = f"<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Berdasarkan Surat Keterangan Nomor {no_surat}/RT.{rt}/RW.{rw}/LB/{tahun} yang dikeluarkan RT.{rt} RW.{rw} benar nama tersebut berdomisili di {alamat} RT.{rt} RW.{rw} Kelurahan Limbungan dan termasuk Keluarga <b>Kurang Mampu</b>. <br/>"
+    text3 = f"<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Berdasarkan Surat Keterangan RT. {rt} RW. {rw} benar nama tersebut berdomisili di {alamat} RT. {rt} RW. {rw} Kelurahan Limbungan dan termasuk Keluarga <b>Kurang Mampu</b>. <br/>"
     elements.append(Paragraph(text3, align.justify_with_leading(12,2,1.5)))
 
     text4 = f"<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Demikian Surat Keterangan ini dibuat untuk <b>{keterangan}</b> <br/>"

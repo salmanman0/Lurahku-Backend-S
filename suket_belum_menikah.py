@@ -16,7 +16,7 @@ def create_pdf(file_path, no_surat, tanggal, rt, rw, romawi, tahun, pelapor, ket
     doc.addPageTemplates([template])
     elements = []
     
-    nomor_surat = f"{no_surat}-SKUm/LB/{romawi}/{tahun}"
+    nomor_surat = f"   /SKUm/LB/{romawi}/{tahun}"
 
     elements.append(Paragraph("<b><u>SURAT KETERANGAN BELUM MENIKAH</u></b>", align.center(12, 2)))
     elements.append(Paragraph(f"Nomor: {nomor_surat}", align.center(12,0.5*cm)))
@@ -26,7 +26,7 @@ def create_pdf(file_path, no_surat, tanggal, rt, rw, romawi, tahun, pelapor, ket
 
     table.table_normal_dalam(elements, pelapor, align.left(12, 2), 0.2*cm)
 
-    text3 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Berdasarkan Surat Keterangan Ketua RT.{rt} RW.{rw} Nomor : {nomor_surat} dan pernyataan dari yang bersangkutan, benar nama tersebut diatas <b>belum pernah menikah</b> sampai dengan tanggal surat ini dikeluarkan."
+    text3 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Berdasarkan Surat Keterangan Ketua RT. {rt} RW. {rw} dan pernyataan dari yang bersangkutan, benar nama tersebut diatas <b>belum pernah menikah</b> sampai dengan tanggal surat ini dikeluarkan."
     elements.append(Paragraph(text3, align.justify_with_leading(12,2,1.5)))
 
     text4 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Demikian Surat Keterangan ini dibuat dengan sebenarnya dan dipergunakan untuk {keterangan}.<br/><br/>"

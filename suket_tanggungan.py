@@ -16,14 +16,14 @@ def create_pdf(file_path, no_surat, romawi, tahun, tanggal, tgl_pengajuan, pelap
     elements = []
 
     elements.append(Paragraph("<b><u>SURAT KETERANGAN TANGGUNGAN KELUARGA</u></b>", align.center_with_leading(12, 2, 1.5)))
-    elements.append(Paragraph(f"Nomor: {no_surat}/SKUm/LB/{romawi}/{tahun}", align.center_with_leading(12, 0.5 * cm, 1.5))) 
+    elements.append(Paragraph(f"Nomor:   /SKUm/LB/{romawi}/{tahun}", align.center_with_leading(12, 0.5 * cm, 1.5))) 
 
     text1 = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Berdasarkan Surat Pernyataan dari saudara {pelapor['Nama']} tanggal {tgl_pengajuan}, Lurah Limbungan Kecamatan Rumbai Timur Kota Pekanbaru, dengan ini menerangkan bahwa :"
     elements.append(Paragraph(text1, align.justify_with_leading(12, 0, 1.5 )))
 
     table.table_normal_dalam(elements, pelapor, align.left(12, 0), 0.2*cm)
 
-    text3 = f"&nbsp;&nbsp;&nbsp;Berdasarkan pengajual surat keterangan tanggungan keluarga pada tanggal {tgl_pengajuan} mempunyai tanggungan Keluarga sebagai berikut:"
+    text3 = f"&nbsp;&nbsp;&nbsp;Berdasarkan pengajuan surat keterangan tanggungan keluarga pada tanggal {tgl_pengajuan} mempunyai tanggungan Keluarga sebagai berikut:"
     elements.append(Paragraph(text3, align.justify_with_leading(12, 0.5*cm, 1.5)))
     
     table.table_tanggungan(elements, tanggungan_data, align.left_with_leading(12, 0, 1.5), 0.2*cm)
