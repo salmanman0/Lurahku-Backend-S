@@ -17,7 +17,7 @@ def create_pdf(file_path, no_surat, tanggal, rt, rw, alamat, romawi, tahun, pela
     elements = []
 
     elements.append(Paragraph("<b><u>SURAT KETERANGAN DOMISILI</u></b>", align.center(12, 2)))
-    elements.append(Paragraph(f"Nomor:   /SKDM/LB/{romawi}/{tahun}", align.center(12,0.5*cm)))
+    elements.append(Paragraph(f"Nomor: .../SKDM/LB/{romawi}/{tahun}", align.center(12,0.5*cm)))
 
     text1 = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lurah Limbungan Kecamatan Rumbai Timur Kota Pekanbaru, dengan ini menerangkan bahwa : "
     elements.append(Paragraph(text1, align.justify_with_leading(12,0,1.5)))

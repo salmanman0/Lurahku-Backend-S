@@ -16,7 +16,7 @@ def create_pdf(file_path, no_surat, tanggal, romawi, tahun, terlapor, pelapor, h
     elements = []
 
     elements.append(Paragraph("<b><u>SURAT KETERANGAN GAIB</u></b>", align.center_with_leading(12,0,1.5)))
-    elements.append(Paragraph(f"Nomor:   /SKum/LB/{romawi}/{tahun}", align.center_with_leading(12,0,2)))
+    elements.append(Paragraph(f"Nomor: .../SKum/LB/{romawi}/{tahun}", align.center_with_leading(12,0,2)))
 
     text1 = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>LURAH LIMBUNGAN KECAMATAN RUMBAI TIMUR KOTA PEKANBARU</b>, dengan ini menerangkan bahwa : "
     elements.append(Paragraph(text1, align.justify_with_leading(12,.0,1.5)))

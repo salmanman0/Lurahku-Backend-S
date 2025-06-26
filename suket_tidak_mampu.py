@@ -17,7 +17,7 @@ def create_pdf(file_path,no_surat, tanggal, romawi, tahun, pelapor, alamat , rt,
     elements = []
 
     elements.append(Paragraph("<b><u>SURAT KETERANGAN TIDAK MAMPU</u></b>", align.center(12, 2)))
-    elements.append(Paragraph(f"<b>No :   /SKTM/LB/{romawi}/{tahun}</b>", align.center(12,0.5*cm)))
+    elements.append(Paragraph(f"<b>No : .../SKTM/LB/{romawi}/{tahun}</b>", align.center(12,0.5*cm)))
 
     text1 = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lurah Limbungan Kecamatan Rumbai Timur Kota Pekanbaru, dengan ini menerangkan bahwa : "
     elements.append(Paragraph(text1, align.justify_with_leading(12,0,1.5)))

@@ -16,7 +16,7 @@ def create_pdf(file_path, no_surat, tanggal, rt, rw, romawi, tahun, pelapor, ket
     doc.addPageTemplates([template])
     elements = []
     
-    nomor_surat = f"   /SKUm/LB/{romawi}/{tahun}"
+    nomor_surat = f" .../SKUm/LB/{romawi}/{tahun}"
 
     elements.append(Paragraph("<b><u>SURAT KETERANGAN BELUM MENIKAH</u></b>", align.center(12, 2)))
     elements.append(Paragraph(f"Nomor: {nomor_surat}", align.center(12,0.5*cm)))
