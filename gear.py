@@ -268,7 +268,7 @@ class TandaTangan:
 
         path_ttd_image = "/static/image/ttd.png"
         img_url = f"https://kelurahan-limbungan.pocari.id{path_ttd_image}"
-        img = Image(img_url, width=200, height=100)  # Tanpa hAlign, karena sudah diatur oleh tabel
+        img = Image(img_url, width=250, height=100)  # Tanpa hAlign, karena sudah diatur oleh tabel
         img.spaceBefore = -20
 
         ttd_akhir = Paragraph(

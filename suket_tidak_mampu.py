@@ -24,7 +24,7 @@ def create_pdf(file_path,no_surat, tanggal, romawi, tahun, pelapor, alamat , rt,
 
     table.table_normal_dalam(elements, pelapor, align.left(12, 2), 0.2*cm)
 
-    text3 = f"<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Berdasarkan Surat Keterangan RT. {rt} RW. {rw} benar nama tersebut berdomisili di {alamat} RT. {rt} RW. {rw} Kelurahan Limbungan dan termasuk Keluarga <b>Kurang Mampu</b>. <br/>"
+    text3 = f"<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Berdasarkan Surat Keterangan RT. {rt} RW. {rw} benar nama tersebut berdomisili di {alamat} Kelurahan Limbungan dan termasuk Keluarga <b>Kurang Mampu</b>. <br/>"
     elements.append(Paragraph(text3, align.justify_with_leading(12,2,1.5)))
 
     text4 = f"<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Demikian Surat Keterangan ini dibuat untuk <b>{keterangan}</b> <br/>"
