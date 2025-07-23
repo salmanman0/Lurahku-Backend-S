@@ -25,6 +25,7 @@ import suket_pindah_wilayah as spw
 import suket_tanggungan as stk
 import suket_orang_yang_sama as soys
 import suket_belum_menikah as sbm
+import suket_gaib as sg
 
 import gear as gear
 import smtplib
@@ -821,6 +822,7 @@ def post_suket_gaib():
             "NIK": nikPelapor,
             "Tempat, Tanggal Lahir": ttlPelapor,
             "Warga Negara" : wargaNegaraP,
+            "Hubungan" : hubunganP,
             "Agama" : agamaP,
             "Pekerjaan" : pekerjaanP,
             "Alamat": f"{alamatPelapor} RT.{rtP} RW.{rwP}",
@@ -1877,6 +1879,283 @@ def update_surat_accept():
                 romawi = gear.get_romawi(bulan)
                 print(jenSur)
                 sp.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", romawi, tahun, isiSur['data_pelapor'], sur['rt'], sur['rw'], isiSur['penghasilanP'], sur['keterangan_surat'])
+            
+            elif jenSur == "Surat Keterangan Gaib" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Gaib", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                sg.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", romawi, tahun, isiSur['data_terlapor'], isiSur['data_pelapor'], isiSur['dataPelapor']['Hubungan'], sur['rt'], sur['rw'], isiSur['bulanHilang'], isiSur['tahunHilang'],sur['keterangan_surat'])
+                
+            elif jenSur == "Surat Keterangan Kematian" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Kematian", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                sk.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", romawi, tahun, isiSur['data_terlapor'], isiSur['data_hari_meninggal'], isiSur['data_pelapor'])
+                
+            elif jenSur == "Surat Keterangan Domisili" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Domisili", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                sd.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", sur['rt'], sur['rw'], isiSur['data_pelapor']['Alamat'], romawi, tahun, isiSur['data_pelapor'], sur['keterangan_surat'])
+            
+            elif jenSur == "Surat Keterangan Domisili Usaha":
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Domisili Usaha", "status_surat": "Surat Disetujui"})
+                if kode_surat:
+                    kode_surat += 1
+                else:
+                    kode_surat = 1
+
+                data_pelapor_raw = isiSur["data_pelapor"]
+                alamat_raw = isiSur["alamat_pengajuan"]
+                peraturan = isiSur["peraturan"]
+                jenisUsaha = isiSur["jenisUsaha"]
+                keterangan = sur["keterangan_surat"]
+
+                # Format tanggal
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat = gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+
+                # Format data pelapor
+                data_pelapor = {
+                    "Nama": f"<b>{data_pelapor_raw['Nama']}</b>",
+                    "NIK": data_pelapor_raw["NIK"],
+                    "Tempat, Tanggal Lahir": data_pelapor_raw["Tempat, Tanggal Lahir"],
+                    "Agama": data_pelapor_raw["Agama"],
+                    "Pekerjaan": data_pelapor_raw["Pekerjaan"],
+                    "Alamat": data_pelapor_raw["Alamat"],
+                }
+
+                # Format alamat usaha
+                alamat_pengajuan = {
+                    "Alamat": alamat_raw["Alamat"],
+                    "Kelurahan": alamat_raw["Kelurahan"],
+                    "Kecamatan": alamat_raw["Kecamatan"],
+                    "Kota": alamat_raw["Kota"],
+                }
+
+                # Buat nama file PDF
+                nama_file_pdf = f"static/file/{jenSur}-{kode_surat}.pdf"
+
+                # Panggil fungsi untuk membuat PDF
+                sdu.create_pdf(
+                    nama_file_pdf,
+                    kode_surat,
+                    f"{hari} {kabisat} {tahun}",
+                    romawi,
+                    tahun,
+                    jenisUsaha,
+                    data_pelapor,
+                    alamat_pengajuan,
+                    peraturan,
+                    keterangan
+                )
+
+            elif jenSur == "Surat Keterangan Domisili Perusahaan":
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Domisili Perusahaan", "status_surat": "Surat Disetujui"})
+                if kode_surat:
+                    kode_surat += 1
+                else:
+                    kode_surat = 1
+
+                data_perusahaan_raw = isiSur["data_perusahaan"]
+                domisili_raw = isiSur["domisili_perusahaan"]
+                namaNotaris = isiSur["namaNotaris"]
+                noAkta = isiSur["noAkta"]
+                tanggalAkta = isiSur["tanggalAkta"]
+                rt = sur["rt"]
+                rw = sur["rw"]
+                keterangan = sur["keterangan_surat"]
+
+                # Format tanggal
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat = gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+
+                # Format data perusahaan
+                data_perusahaan = {
+                    "Nama Perusahaan": f"<b>{data_perusahaan_raw['Nama Perusahaan']}</b>",
+                    "Nama": f"<b>{data_perusahaan_raw['Nama']}</b>",
+                    "Jabatan": f"<b>{data_perusahaan_raw['Jabatan']}</b>",
+                    "NIK": f"<b>{data_perusahaan_raw['NIK']}</b>",
+                }
+
+                # Format domisili
+                domisili_perusahaan = {
+                    "Jalan": domisili_raw["Jalan"],
+                    "Kelurahan": domisili_raw["Kelurahan"],
+                    "Kecamatan": domisili_raw["Kecamatan"],
+                    "Kota": domisili_raw["Kota"],
+                }
+
+                # Buat nama file
+                nama_file_pdf = f"static/file/{jenSur}-{kode_surat}.pdf"
+
+                # Panggil fungsi untuk membuat PDF
+                sdp.create_pdf(
+                    nama_file_pdf,
+                    kode_surat,
+                    f"{hari} {kabisat} {tahun}",
+                    romawi,
+                    tahun,
+                    namaNotaris,
+                    noAkta,
+                    tanggalAkta,
+                    rt,
+                    rw,
+                    data_perusahaan,
+                    domisili_perusahaan,
+                    keterangan
+                )
+            elif jenSur == "Surat Keterangan Pindah Wilayah" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Pindah Wilayah", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                spw.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", romawi, tahun, isiSur['data_pelapor']['Alamat'], sur['rw'], sur['rt'], isiSur['data_pelapor'], isiSur['nomorSPKTP'], isiSur['tglSPKTP'], sur['keterangan_surat'])
+                
+            elif jenSur == "Surat Keterangan Orang Yang Sama" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Orang Yang Sama", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                soys.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", romawi, tahun, isiSur['data_pelapor'], isiSur['dataBenar'], isiSur['dataSalah'], isiSur['dokumenBenar'], isiSur['dokumenSalah'], isiSur['nomorDokumenBenar'], isiSur['nomorDokumenSalah'], sur['keterangan_surat'])
+            
+            elif jenSur == "Surat Keterangan Belum Menikah" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Belum Menikah", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                sbm.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", sur['rt'], sur['rw'], romawi, tahun, isiSur['data_pelapor'], sur['keterangan_surat'])
+            
+            elif jenSur == "Surat Keterangan Tanggungan Keluarga" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Tanggungan Keluarga", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                
+                tanggunganKeluarga = {};
+                x = 1;
+                for tanggungan in isiSur["tanggungan_data"] :
+                    tanggunganKeluarga[f'{x}'] = tanggungan
+                    x += 1
+                
+                print(f"SALMAN ================================================================= {tanggunganKeluarga}")
+                stk.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, romawi, tahun, f"{hari} {kabisat} {tahun}", sur['tanggal_pengajuan'], isiSur['data_pelapor'], tanggunganKeluarga, sur['keterangan_surat'])
+                
+            db.surat.update_one({'suratId' : suratId}, {'$set' : {'status_surat' : 'Surat Disetujui', 'kode_surat' : kode_surat}})
+            return jsonify(status='sukses', message="Berhasil diperbaharui"), 200
+        
+        elif(user['jabatan'] == "Admin"):
+            
+            kode_surat = 1
+            
+            sur = db.surat.find_one({'suratId' : suratId}, {'_id' :0})
+            jenSur = sur['jenis_surat']
+            isiSur = sur['isi_surat']
+            
+            data_riwayat = {
+                "riwayatId" : riwayatId,
+                "suratId" : suratId,
+                "uId" : uIdRiwayat,
+                "catatan" : catatan,
+                "status_surat" : "Surat Disetujui",
+                "waktu" : f"{jam}:{menit}:{detik} • {hari} {kabisat} {tahun}"
+            }
+            db.riwayat.insert_one(data_riwayat)
+            if jenSur == "Surat Keterangan Tidak Mampu" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Tidak Mampu", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                stm.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", romawi, tahun, isiSur['data_pelapor'], isiSur['data_pelapor']['Alamat'],sur['rt'], sur['rw'], sur['keterangan_surat'])
+            
+            elif jenSur == "Surat Keterangan Gaib" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Gaib", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                sg.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", romawi, tahun, isiSur['data_terlapor'], isiSur['data_pelapor'], isiSur['dataPelapor']['Hubungan'], sur['rt'], sur['rw'], isiSur['bulanHilang'], isiSur['tahunHilang'],sur['keterangan_surat'])
+                
+            elif jenSur == "Surat Keterangan Penghasilan" :
+                
+                kode_surat = db.surat.count_documents({"jenis_surat": "Surat Keterangan Penghasilan", "status_surat": "Surat Disetujui"})
+                if kode_surat : 
+                    kode_surat = kode_surat + 1
+                else :
+                    kode_surat = 1
+                # kode_surat = int(kode_surat)
+                hari, bulan, tahun = gear.get_tanggal()
+                kabisat =gear.get_kabisat(bulan)
+                romawi = gear.get_romawi(bulan)
+                print(jenSur)
+                sp.create_pdf(f"static/file/{jenSur}-{kode_surat}.pdf", kode_surat, f"{hari} {kabisat} {tahun}", romawi, tahun, isiSur['data_pelapor'], sur['rt'], sur['rw'], isiSur['penghasilanP'], sur['keterangan_surat'])
                 
             elif jenSur == "Surat Keterangan Kematian" :
                 
@@ -2140,6 +2419,18 @@ def update_surat_reject():
                 "uId" : uIdRiwayat,
                 "catatan" : catatan,
                 "status_surat" : "Ditolak Lurah",
+                "waktu" : f"{jam}:{menit}:{detik} • {hari} {kabisat} {tahun}"
+            }
+            db.riwayat.insert_one(data_riwayat)
+            return jsonify(status='sukses', message="Berhasil diperbaharui"), 200
+        elif(user['jabatan'] == "Admin"):
+            db.surat.update_one({'suratId' : suratId}, {'$set' : {'status_surat' : 'Ditolak Admin'}})
+            data_riwayat = {
+                "riwayatId" : riwayatId,
+                "suratId" : suratId,
+                "uId" : uIdRiwayat,
+                "catatan" : catatan,
+                "status_surat" : "Ditolak Admin",
                 "waktu" : f"{jam}:{menit}:{detik} • {hari} {kabisat} {tahun}"
             }
             db.riwayat.insert_one(data_riwayat)
